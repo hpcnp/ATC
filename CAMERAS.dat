@@ -1,3 +1,9 @@
 # Label, Vertical Pixels, Horizontal Pixels, Pixel Size (Microns), Type (Mono/OSC), QE (%), Cooled (YES,NO)
+#
+# NOTE to self - should this include full well depth?
+#
 1600mm, 3520, 4656, 3.8, Mono, 60, YES
 2600mc, 4176, 6248, 3.76, OSC, 81, YES
+120mm, 960, 1280, 3.75, Mono, 80, NO
+183mc, 3672, 5496, 2.4, OSC, 84, NO
+585mc, 2160, 3840, 2.9, OSC, 91, NO
