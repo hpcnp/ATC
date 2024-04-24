@@ -1,4 +1,12 @@
-LAT="33.70"
-LONG="-117.72"
+LAT="333.697472"    
+LONG="-117.72314"
 ASTRO_DB="astro.db"
-
+PLAN_OUTPUT="asiair"    # Plan output type (asiair, nina, ... others)
+#==============================================================================================
+# Constraints
+#
+MIN_SHOOTING_TIME="2"   # number of hours a target must satisfy eligibility
+MIN_HORIZON_ANGLE="30"  # angle in degrees which the target must be above to be elligible
+MIN_OBJECT_SIZE="8"     # Minimum object size in arcminutes
+MAX_OBJECT_SIZE="40"    # Maximum object size in arcminutes
+MIN_APP_BRIGHT="13"     # Minimum apparent brightness
