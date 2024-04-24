@@ -12,7 +12,6 @@ INPUTS
 
 - Latitude & Longitude
 - DB of astronomical targets
-- FOV (scope and camera combination)
 - Priority list of targets
 - Override list of targets
 - Priority list of target types
@@ -20,7 +19,6 @@ INPUTS
 - Minimum elevation 
 - Minimum object size (or fraction of the FOV)
 - Integration time by apparent magnitude and object type
-- Borttle class for location 
 - List of cameras, sensor sizes, pixel size, QE, and mm/mc
 - Plan output type (asiair, Nina, kstars)
 
