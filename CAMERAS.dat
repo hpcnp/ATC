@@ -1,0 +1,3 @@
+# Label, Vertical Pixels, Horizontal Pixels, Pixel Size (Microns), Type (Mono/OSC), QE (%), Cooled (YES,NO)
+1600mm, 3520, 4656, 3.8, Mono, 60, YES
+2600mc, 4176, 6248, 3.76, OSC, 81, YES
