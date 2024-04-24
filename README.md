@@ -4,10 +4,12 @@ Astronomy Target Chooser (ATC)
 A tool to help amateur astronomers optimize their photography time by using an astronomical database
 and the astronomer's location, setup, and interests to recommend targets, gain, exposure, filters, etc.
 
+The code is designed to be run once per day. It recommends targets based on several factors and constraints 
+and sets expectations for when imaging will start, when it will end.
+
 INPUTS
 ------
 
-- Date & Time
 - Latitude & Longitude
 - DB of astronomical targets
 - FOV (scope and camera combination)
