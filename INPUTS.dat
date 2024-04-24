@@ -1,0 +1,13 @@
+LAT="33.70"
+LONG="-117.72"
+ASTRO_DB="astro.db"
+#
+# SCOPE DATA
+FOCAL="2350"  # in mm
+APERTURE="235"  # in mm
+TYPE="Schmidt-Cassgrain"
+#
+# CAMERA DATA
+SENSOR_HEIGHT="3190"  # in pixels
+SENSOR_LENGTH="4350"  # in pixels
+PIXEL_SIZE="4.25" # microns
