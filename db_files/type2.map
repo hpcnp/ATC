@@ -1,0 +1,28 @@
+1STAR,1 Star
+2STAR,2 Star
+3STAR,3 Star
+4STAR,4 Star
+8STAR,8 Star
+ASTER,Asterism
+BRTNB,Bright Nebulala
+CL+NB,Cluster+Nebula
+DRKNB,Dark Nebulala
+GALCL,Galaxy clust.
+GALXY,Galaxy
+G+C+N,Gal. Cl. Nebula
+GLOCL,Globular Clu.
+GX+DN,Diffuse Nebula
+GX+GC,Glob Cl. Nebula
+LMCCN,Cl. w/Nebula LMC
+LMCDN,Diff Nebula LMC
+LMCGC,Glob Clus. LMC
+LMCOC,Open Clus. LMC
+NONEX,Non-existant
+OPNCL,Open Cluster
+PLNNB,Planetary Nebulala
+QUASR,Quasar
+SMCCN,Nebula Cluster SMC
+SMCDN,Diffuse Clus. SMC
+SMCGC,Glob. Cluster SMC
+SMCOC,Open Clus SMC
+SNREM,Supernova Rem.

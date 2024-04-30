@@ -1,0 +1,25 @@
+GX,Galaxy
+PN,Planetary Nebula
+AST,Asterism
+OC,Open Cluster
+C+N,Nebula Cluster
+GC,Globular Cluster
+NF,Not Found
+EN,Emission Nebula
+RN,Reflection Nebula
+SNR,Supernova Remnant
+DN,Diffuse Nebula
+AN,Annular Nebula
+MWSC,Milkyway Star Cloud
+Nb,Emission Nebula
+TS,Triple Star
+DS,Double Star
+PD,Plate DEFECT
+Kt,Nebula in Galaxy
+Dup,Disk unseen object
+*,Single star
+**,Double star
+***,Triple star
+
+
+

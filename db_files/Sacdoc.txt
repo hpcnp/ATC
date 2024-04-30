@@ -1,0 +1,88 @@
+LACERTA             LAC
+LEO                 LEO
+LEO MINOR           LMI
+LEPUS               LEP
+LIBRA               LIB
+LUPUS               LUP
+LYNX                LYN
+LYRA                LYR
+MENSA               MEN
+MICROSCOPIUM        MIC
+MONOCEROS           MON
+MUSCA               MUS
+NORMA               NOR
+OCTANS              OCT
+OPHIUCHUS           OPH
+ORION               ORI
+PAVO                PAV
+PEGASUS             PEG
+PERSEUS             PER
+PHOENIX             PHE
+PICTOR              PIC
+PISCES              PSC
+PISCES AUSTRINUS    PSA
+PUPPIS              PUP
+PYXIS               PYX
+RETICULUM           RET
+SAGITTA             SGE
+SAGITTARIUS         SGR
+SCORPIUS            SCO
+SCULPTOR            SCL
+SCUTUM              SCT
+SERPENS             SER
+SEXTANS             SEX
+TAURUS              TAU
+TELESCOPIUM         TEL
+TRIANGULUM AUSTRALE TRA
+TRIANGULUM          TRI
+TUCANA              TUC
+URSA MAJOR          UMA
+URSA MINOR          UMI
+VELA                VEL
+VIRGO               VIR
+VOLANS              VOL
+VULPECULA           VUL
+ANDROMEDA           AND
+ANTLIA              ANT
+APUS                APS
+AQUARIUS            AQR
+AQUILA              AQL
+ARA                 ARA
+ARIES               ARI
+AURIGA              AUR
+BOOTES              BOO
+CAELUM              CAE
+CAMELOPARDALIS      CAM
+CANCER              CNC
+CANES VENATICI      CVN
+CANIS MAJOR         CMA
+CANIS MINOR         CMI
+CAPRICORNUS         CAP
+CARINA              CAR
+CASSIOPEIA          CAS
+CENTAURUS           CEN
+CEPHEUS             CEP
+CETUS               CET
+CHAMAELEON          CHA
+CIRCINUS            CIR
+COLUMBA             COL
+COMA BERENICES      COM
+CORONA AUSTRALIS    CRA
+CORONA BOREALIS     CRB
+CORVUS              CRV
+CRATER              CRT
+CRUX                CRU
+CYGNUS              CYG
+DELPHINUS           DEL
+DORADO              DOR
+DRACO               DRA
+EQUULEUS            EQU
+ERIDANUS            ERI
+FORNAX              FOR
+GEMINI              GEM
+GRUS                GRU
+HERCULES            HER
+HOROLOGIUM          HOR
+HYDRA               HYA
+HYDRUS              HYI
+INDUS               IND

@@ -1,0 +1,112 @@
+#!/bin/bash
+#
+DEBUG="0"
+FILE="ngc_raw.csv"
+ABR_FILE="abr_const.map"
+SEA_FILE="const_seas.map"
+TYPE_FILE="type.map"
+OUT_FILE="ngc_proc.csv"
+
+echo "UM,NGC,CONSTELLATION,MAG,VIEW,Ang. Size (Amin), Rt. Asc., Declin., TYPE, OBJECT REMARKS" >  $OUT_FILE
+
+TOT_LINES=`wc $FILE |awk '{print $1}'`
+let LN=1
+while [[ $LN -le $TOT_LINES ]] ; do
+	FILE_LINE=`sed -n $LN'p' $FILE`
+	NGC=`echo $FILE_LINE |cut -d"," -f2`
+
+	# Translate the constellation
+	ABR_STRG=`echo $FILE_LINE |cut -d"," -f3`
+
+	let K=1
+	FIND="0"
+	while [[ $FIND == "0" ]] ; do
+		ABR=`sed -n $K'p' $ABR_FILE |cut -d"," -f1`
+		if [[ $ABR == $ABR_STRG ]] ; then
+			CONST=`sed -n $K'p' $ABR_FILE |cut -d"," -f2`
+			FIND="1"
+		elif [[ -z $ABR ]] ; then
+			echo "  ERROR: Constellation abbreviation: $ABR_STRG is not in map"
+			exit 1
+		else
+			if [[ $DEBUG != "0" ]]  ; then
+				echo "  DEBUG: Didnt match const abbreviation. Line=$K ABR=$ABR  ABR_STRG=$ABR_STRG"
+			fi
+		fi
+
+		let K=K+1
+	done
+
+	# Pass the Magnitude on
+	MAG=`echo $FILE_LINE |cut -d"," -f4`
+
+	# Match constellation to a season (North America)
+	let K=1
+	FIND="0"
+	while [[ $FIND == "0" ]] ; do
+		CONST_STRG=`sed -n $K'p' $SEA_FILE |cut -d"," -f1`
+		if [[ $CONST == $CONST_STRG ]] ; then
+			SEASON=`sed -n $K'p' $SEA_FILE |cut -d"," -f2`
+			FIND="1"
+		elif [[ -z $CONST_STRG ]] ; then
+			echo "  ERROR: Constellation: $CONST is not in SEASON map"
+			exit 1
+		else
+			if [[ $DEBUG != "0" ]]  ; then
+				echo "  DEBUG: Didnt match season. Line=$K CONST=$CONST  CONST_STRG=$CONST_STRG"
+			fi
+		fi
+
+		let K=K+1
+	done
+
+	# Calculate the angular diameter (ArcMin)
+	STRING=`echo $FILE_LINE |cut -d"," -f6`
+	AAA=`echo $STRING |cut -d"x" -f1`
+	BBB=`echo $STRING |cut -d"x" -f2`
+	if [[ -z $BBB ]] ; then
+	   ARC_MIN=$STRING
+	else
+	   ARC_MIN=`awk "BEGIN {printf \"%.1f\n\",sqrt(${AAA}^2+${BBB}^2)}"`
+	fi
+
+	# Pass on R Asc and Declin.
+	RASC=`echo $FILE_LINE |cut -d"," -f7`
+	DECLIN=`echo $FILE_LINE |cut -d"," -f8`
+
+	# Translate the object type
+	let K=1
+	FIND="0"
+	TYPE_ABR=`echo $FILE_LINE |cut -d"," -f9`
+
+	while [[ $FIND == "0" ]] ; do
+		TYPE_STRG=`sed -n $K'p' $TYPE_FILE |cut -d"," -f1`
+		if [[ $TYPE_ABR == $TYPE_STRG ]] ; then
+			TYPE=`sed -n $K'p' $TYPE_FILE |cut -d"," -f2`
+			FIND="1"
+		elif [[ -z $TYPE_STRG ]] ; then
+			echo "  ERROR: Type Abbreviation $TYPE_ABR was not found"
+			exit 1
+		else
+			if [[ $DEBUG != "0" ]]  ; then
+				echo "  DEBUG: Didnt match Type abbreviation. Line=$K TYPE_ABR=$TYPE_ABR  TYPE_STRG=$TYPE_STRG"
+			fi
+		fi
+
+		let K=K+1
+	done
+
+	# Pass on objects, remarks, and WH
+	OBJRM=`echo $FILE_LINE |cut -d"," -f10,11,12,13,14,15,16 |sed 's/\"//g' `
+
+
+	NEW_LINE=",${NGC},${CONST},${MAG},${SEASON},${ARC_MIN},${RASC},${DECLIN},\"${TYPE} - ${OBJRM} ${WH}\""
+	#echo "${LN}- OLD LINE: $FILE_LINE"
+	echo "${LN}- NEW LINE: $NEW_LINE"
+	echo "$NEW_LINE" >>  $OUT_FILE
+	let LN=LN+1
+
+done
+
+exit 0
+

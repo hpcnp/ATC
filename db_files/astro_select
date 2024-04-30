@@ -1,0 +1,528 @@
+#!/bin/bash 
+#
+#  astro_select -T [type] -M [max magnitude] -C [constellation] -S [min size] -AL [latitude] -d [date-time] -D -L -LC -n [# objects] -V -v -s [sort field]
+#
+#--- FILES ---
+OBJ_DB="/data/ASTRO/object_info/Sac72_mod.txt"
+OBJ_TMP_NAME="/tmp/.astro_obj_list_%"
+OUT_NAME_FINAL="/tmp/.astro_obj_list_F"
+OBJ_TYPES="/data/ASTRO/object_info/trans/types"
+OBJ_CONSTS="/data/ASTRO/object_info/trans/const"
+echo "" > /tmp/.astro_obj_list
+#-------------
+#   DEFAULTS
+LIST_ALLOW=0
+DEBUG=0
+NOBJECTS=20
+SORT_FIELD=7
+LOC_LATITUDE="33_N"
+LOC_LONG="-118"
+VERBOSE="NO"
+VISIBLE_ONLY="YES"
+# Time of year   
+DATE=`date +%D`
+MONTH=`date +%m`
+DAY=`date +%d`
+HOUR=`date +%H`
+MINUTE=`date +%M`
+#
+#-------------
+while [[ -n $1 ]] ; do
+  case $1 in
+   --help )
+	echo ""
+	echo "   astro_select -T [type] -M [max magnitude] -C [constellation] -S [min size] -AL [latitude] -D -L -LC -n [# objects] -V -v -s [sort field]"
+	echo ""
+	echo "      -AL: Latitude to the nearest degree followed by N or S - default is 33_N"
+	echo "      -L : list the acceptable types"
+	echo "      -LC : list the acceptable constellations"
+	echo "      -n : [# objects] selects the limit for the number of objects output"
+	echo "      -d : date-time in format:  MM/DD/YY-HH:mm - default is now"
+	echo "      -D : enable DEBUG (LOTS of output)"
+	echo "      -s : sort field [1-11]  1-name, 2-type, 3-constellation, 11-size, default: 7 (magnitude)"
+	echo "      -V : toggle only visible objects - default visible only enabled"
+	echo "      -v : verbose output (common names, comments, etc)"
+	echo ""
+	exit 0
+	;;
+   -M)
+	MAX_MAG=$2
+	shift
+	shift
+	;;
+   -C)
+	REQD_CONST=`echo ${2^^}`
+	shift
+	shift
+	;;
+   -S)
+	MIN_SIZE=$2
+	shift
+	shift
+	;;
+   -AL)
+	ASTRO_LAT=$2
+	shift
+	shift
+	;;
+   -T)
+        REQD_TYPE=`echo ${2^^}`
+	shift
+	shift
+	;;
+   -n)
+	NOBJECTS=$2
+	shift
+	shift
+	;;
+   -L)
+	echo ""
+	cat ${OBJ_TYPES} |cut -d"," -f2
+	echo ""
+	exit 0	
+	;;
+   -LC)
+	echo ""
+	cat ${OBJ_CONSTS} |cut -d"~" -f1
+	echo ""
+	exit 0	
+	;;
+   -d)
+        # Time of year   
+        DATE=`echo $2 |cut -d"-" -f1`
+        MONTH=`echo $2 |cut -d"-" -f1 |cut -d"/" -f1`
+        DAY=`echo $2 |cut -d"-" -f1 |cut -d"/" -f2`
+        HOUR=`echo $2 |cut -d"-" -f2 |cut -d":" -f1`
+        MINUTE=`echo $2 |cut -d"-" -f2 |cut -d":" -f1`
+        shift
+        shift
+	;;
+   -D)
+	DEBUG="1"
+	let NOBJECTS=10
+        shift
+	;;
+   -V)
+	VISIBLE_ONLY="NO"
+        shift
+	;;
+   -v)
+	VERBOSE="YES"
+        shift
+	;;
+   *)
+	echo ""
+	echo "   ERROR - invalid input"
+	echo ""
+	echo "   astro_select -T [type] -M [max magnitude] -C [constellation] -S [min size] -AL [latitude] -D -L -LC -n [# objects] -V -v -s [sort field]"
+	echo ""
+	echo "      -AL: Latitude to the nearest degree followed by N or S - default is 33_N"
+	echo "      -L : list the acceptable types"
+	echo "      -LC : list the acceptable constellations"
+	echo "      -n : [# objects] selects the limit for the number of objects output"
+	echo "      -d : date-time in format:  MM/DD/YY-HH:mm - default is now"
+	echo "      -D : enable DEBUG (LOTS of output)"
+	echo "      -s : sort field [1-11]  1-name, 2-type, 3-constellation, 11-size, default: 7 (magnitude)"
+	echo "      -V : toggle only visible objects - default visible only enabled"
+	echo "      -v : verbose output (common names, comments, etc)"
+	echo ""
+	exit 1
+	;;
+  esac
+done
+
+if [[ -n ${REQD_CONST} ]] ; then
+   CONST_EXISTS=`grep -ic ${REQD_CONST} ${OBJ_CONSTS}`
+   if [[ ${CONST_EXISTS} -eq 0 ]] ; then
+      echo ""
+      echo "   ERROR - The constellation ${REQD_CONST} is not part of the available list"
+      echo ""
+      exit 1
+   fi
+fi
+
+if [[ -n ${ASTRO_LAT} ]] ; then
+   LOC_LATITUDE=${ASTRO_LAT}
+   echo "	DEBUG: Got Latitude from environment or command line ${ASTRO_LAT}"
+fi
+
+if [[ -f /tmp/.astro_obj_list* ]] ; then 
+  rm -Rf /tmp/.astro_obj_list* 
+fi
+
+let K=1
+#----------------------------------------------------------
+# Constellation
+if [[ -n ${REQD_CONST} ]] ; then
+   echo "   ... Downselecting for constellation ${REQD_CONST}"
+   OUT_NAME=`echo ${OBJ_TMP_NAME} |sed 's/%/'${K}'/g'`
+   CONST_CODE=`grep ${REQD_CONST} ${OBJ_CONSTS}| cut -d"~" -f2 |sed 's/@//g'`
+   #echo "       DEBUG: OUT_NAME=${OUT_NAME}  CONST_CODE=${CONST_CODE}  OBJ_DB=${OBJ_DB}"
+
+   if [[ ${K} -eq 1 ]] ; then
+      grep ${CONST_CODE} ${OBJ_DB} > ${OUT_NAME}
+   else
+      let L=K-1
+      DB_NAME=`echo ${OUT_NAME} |sed 's/'${K}'/'${L}'/g'`
+      grep ${CONST_CODE} ${DB_NAME} > ${OUT_NAME}
+   fi
+
+   RECORDS=`wc ${OUT_NAME} |awk '{print $1}'`
+   echo "      ${RECORDS} records left"
+   let K=K+1
+fi
+
+#----------------------------------------------------------
+# Object type
+if [[ -n ${REQD_TYPE} ]] ; then
+   echo "   ... Downselecting for type ${REQD_TYPE}"
+
+   if [[ ${REQD_TYPE} == "NEB" ]] || [[ ${REQD_TYPE} == "NEBULA" ]] ; then
+      TYPE_CODE="BRTNB\|DRKNB\|PLNNB\|LMCDN"
+      echo "   ... Substituting ${REQD_TYPE} for BRTNB, DRKNB, PLNNB -> ${TYPE_CODE}"
+   elif [[ ${REQD_TYPE} == "GAL" ]] || [[ ${REQD_TYPE} == "GALAXY" ]] ; then
+      TYPE_CODE="GALCL\|GALXY\|G+C+N\|GX+GC"
+      echo "   ... Substituting ${REQD_TYPE} for GALCL, GALXY, GX+GC -> ${TYPE_CODE}"
+   elif [[ ${REQD_TYPE} == "CLU" ]] || [[ ${REQD_TYPE} == "CLUSTER" ]] ; then
+      TYPE_CODE="GLOCL\|LMCCN\|OPNCL"
+      echo "   ... Substituting ${REQD_TYPE} for GLOCL, LMCCN, OPNCL -> ${TYPE_CODE}"
+   else
+      TYPE_CODE=`grep -i ${REQD_TYPE} ${OBJ_TYPES} |head -1 |cut -d"," -f1`
+   fi	
+
+   OUT_NAME=`echo ${OBJ_TMP_NAME} |sed 's/%/'${K}'/g'`
+   #echo "       DEBUG: OUT_NAME=${OUT_NAME}  TYPE_CODE=${TYPE_CODE}  OBJ_DB=${OBJ_DB}"
+
+   if [[ ${K} -eq 1 ]] ; then
+      #echo "     DEBUG: K=${K}  grep ${TYPE_CODE} ${OBJ_DB} > ${OUT_NAME}"
+      grep ${TYPE_CODE} ${OBJ_DB} > ${OUT_NAME}
+   else
+      let L=K-1
+      DB_NAME=`echo ${OUT_NAME} |sed 's/'${K}'/'${L}'/g'`
+      #echo "     DEBUG: K=${K}  grep ${TYPE_CODE} ${DB_NAME} > ${OUT_NAME}"
+      grep ${TYPE_CODE} ${DB_NAME} > ${OUT_NAME}
+   fi
+
+   RECORDS=`wc ${OUT_NAME} |awk '{print $1}'`
+   echo "      ${RECORDS} records left"
+   let K=K+1
+
+   if [[ ${RECORDS} -eq 0 ]] ; then
+      echo "   No objects match these criteria"
+      echo ""
+      exit 0
+   fi
+fi
+
+#----------------------------------------------------------
+# Magnitude
+
+if [[ -n ${MAX_MAG} ]] ; then
+   echo "   ... Downselecting for magnitudes less than ${MAX_MAG}"
+   OUT_NAME=`echo ${OBJ_TMP_NAME} |sed 's/%/'${K}'/g'`
+   echo "" > ${OUT_NAME}
+
+   let L=K-1
+   DB_NAME=`echo ${OUT_NAME} |sed 's/'${K}'/'${L}'/g'`
+   let M=1
+
+   while [[ ${M} -le ${RECORDS} ]] ; do
+      LINE=`sed -n ${M}'p' ${DB_NAME}`
+      MAG=`echo ${LINE} |cut -d"~" -f7 |sed 's/ //g' |sed 's/\"//g' |sed 's/p//g'`
+      #echo "     DEBUG: Line: ${M} MAG=${MAG} < ${MAX_MAG}"
+
+      if [[ -z ${MAG} ]] ; then
+         let M=M+1
+         continue
+      fi
+
+      TEST=`echo "${MAG} < ${MAX_MAG}" |bc`
+      if [[ ${TEST} -gt 0 ]] ; then
+	 echo ${LINE} >> ${OUT_NAME}  
+         #echo "     DEBUG: sent to output"
+         let M=M+1
+      else
+         let M=M+1
+      fi
+   done
+
+   let K=K+1
+
+   RECORDS=`wc ${OUT_NAME} |awk '{print $1}'`
+
+   if [[ ${RECORDS} -eq 0 ]] ; then
+      echo "   No objects match these criteria"
+      echo ""
+      exit 0
+   else 
+      echo "      ${RECORDS} records left"
+   fi
+fi
+
+#----------------------------------------------------------
+# Size
+
+if [[ -n ${MIN_SIZE} ]] ; then
+   echo "   ... Downselecting for size greater than ${MIN_SIZE} arcmin"
+   OUT_NAME=`echo ${OBJ_TMP_NAME} |sed 's/%/'${K}'/g'`
+   echo "" > ${OUT_NAME}
+
+   let L=K-1
+   DB_NAME=`echo ${OUT_NAME} |sed 's/'${K}'/'${L}'/g'`
+   let M=1
+
+   while [[ ${M} -le ${RECORDS} ]] ; do
+      LINE=`sed -n ${M}'p' ${DB_NAME}`
+      SIZE=`echo ${LINE} |cut -d"~" -f11 |sed 's/ //g' |sed 's/\"//g' |sed 's/m//g'`
+      #echo "     DEBUG: Line: ${M} SIZE=${SIZE} > ${MIN_SIZE}"
+
+      if [[ -z ${SIZE} ]] ; then
+         let M=M+1
+         continue
+      fi
+
+      TEST=`echo "${SIZE} > ${MIN_SIZE}" |bc`
+      if [[ ${TEST} -gt 0 ]] ; then
+	 echo ${LINE} >> ${OUT_NAME}  
+         #echo "     DEBUG: sent to output"
+         let M=M+1
+      else
+         let M=M+1 
+      fi
+   done
+
+   let K=K+1
+
+   RECORDS=`wc ${OUT_NAME} |awk '{print $1}'`
+
+   if [[ ${RECORDS} -eq 0 ]] ; then
+      echo "   No objects match these criteria"
+      echo ""
+      exit 0
+   else 
+      echo "      ${RECORDS} records left"
+   fi
+fi
+
+#----------------------------------------------------------
+# Visible only
+#
+if [[ ${VISIBLE_ONLY} == "YES" ]] ; then
+   # RA
+   NORTH=`echo ${LOC_LATITUDE} |cut -d"_" -f2`
+   LAT=`echo ${LOC_LATITUDE} |cut -d"_" -f1` 
+
+   echo "   ... Downselecting for visible objects only from ${LAT} deg ${NORTH} latitude"
+   OUT_NAME=`echo ${OBJ_TMP_NAME} |sed 's/%/'${K}'/g'`
+   echo "" > ${OUT_NAME}
+
+   let L=K-1
+   DB_NAME=`echo ${OUT_NAME} |sed 's/'${K}'/'${L}'/g'`
+   let M=1
+
+   while [[ ${M} -le ${RECORDS} ]] ; do
+      LINE=`sed -n ${M}'p' ${DB_NAME}`
+      OBJ_DEC_DEG=`echo ${LINE} |cut -d"~" -f6 |sed 's/\"//g' |cut -d" " -f1 |sed 's/+0//' | sed 's/-0//g' |sed 's/+//g' |sed 's/\°/%/g' |cut -d"%" -f1`
+      OBJ_DEC_MIN=`echo ${LINE} |cut -d"~" -f6 |sed 's/\"//g' |cut -d" " -f2`
+      #echo "     DEBUG: M=${M} RECORDS=${RECORDS} NORTH=${NORTH} OBJ_DEC_DEG=${OBJ_DEC_DEG}"
+
+      if [[ ${NORTH} == "N" ]] ; then
+	 let MIN_DEC=${LAT}-90
+	 if [[ ${OBJ_DEC_DEG} -ge ${MIN_DEC} ]] ; then
+            #echo "     DEBUG: Line accepted"
+	    echo ${LINE} >> ${OUT_NAME}
+         fi
+      else
+	 let MAX_DEC=90-${LAT}
+	 if [[ ${OBJ_DEC_DEG} -le ${MAX_DEC} ]] ; then
+            #echo "     DEBUG: Line accepted"
+	    echo ${LINE} >> ${OUT_NAME}
+         fi
+      fi 
+
+      let M=M+1
+   done
+
+   #let K=K+1
+   #OUT_NAME=`echo ${OBJ_TMP_NAME} |sed 's/%/'${K}'/g'`
+   #echo "" > ${OUT_NAME}
+   #
+   #let L=K-1
+   #DB_NAME=`echo ${OUT_NAME} |sed 's/'${K}'/'${L}'/g'`
+   #let M=1
+   #
+   #while [[ ${M} -le ${RECORDS} ]] ; do
+   #   LINE=`sed -n ${M}'p' ${DB_NAME}`
+   #   OBJ_RA_HR=`echo ${LINE} |cut -d"~" -f5 |sed 's/\"//g' |cut -d" " -f1`
+   #   OBJ_RA_MIN=`echo ${LINE} |cut -d"~" -f5 |sed 's/\"//g' |cut -d" " -f2`
+   #   OBJ_RA_DECIMAL=`echo "(${OBJ_RA_HR} + ${OBJ_RA_MIN}/60.0) * 15.0" |bc`
+
+   #   OBJ_DEC_DEG=`echo ${LINE} |cut -d"~" -f6 |sed 's/\"//g' |cut -d" " -f1`
+   #   OBJ_DEC_MIN=`echo ${LINE} |cut -d"~" -f6 |sed 's/\"//g' |cut -d" " -f2`
+   #   OBJ_DEC_DECIMAL=`echo "${OBJ_DEC_DEG} + ${OBJ_DEC_MIN}/60.0" |bc`
+   #
+   #
+   #done
+
+
+   let K=K+1
+fi
+
+#----------------------------------------------------------
+if [[ ${DEBUG} != "0" ]] ; then
+   echo "     DEBUG: OUT NAME ${OUT_NAME}"
+   echo "     DEBUG: SORT FIELD ${SORT_FIELD}"
+   echo "     DEBUG: # Objects ${NOBJECTS}"
+   sleep 2
+fi
+
+NLINES_TOTAL=`wc ${OUT_NAME} |awk '{print $1}'`
+let I=1
+let J=1
+let ONC_MAX=0
+let OTC_MAX=0
+let COC_MAX=0
+
+if [[ ${DEBUG} != 0 ]] ; then
+  echo "	DEBUG: NLINES = ${NLINES_TOTAL}, I= ${I}"
+fi
+
+while [[ ${I} -le ${NLINES_TOTAL} ]] ; do
+   if [[ ${J} -gt ${NOBJECTS} ]] ; then
+      if [[ ${DEBUG} != 0 ]] ; then
+         echo "	DEBUG: Max # objects reached"
+      fi
+      break
+   fi
+
+   THIS_LINE=`sed -n ${I}'p' ${OBJ_DB}`
+   OBJECT_NAME=`echo ${THIS_LINE} |cut -d"~" -f1| sed 's/\"//g' |sed 's/ //g'`
+   OBJECT_NAME_CHARS=`echo ${OBJECT_NAME} |wc |awk '{print $3}'`
+   if [[ ${OBJECT_NAME_CHARS} -ge ${ONC_MAX} ]] ; then
+      ONC_MAX=${OBJECT_NAME_CHARS}
+   fi
+
+   TMPSTR=`echo ${THIS_LINE} |cut -d"~" -f3 |sed 's/\"//g'`
+     OBJ_TYPE=`grep ${TMPSTR} ${OBJ_TYPES} |cut -d"," -f2`
+     OBJ_TYPE_CHARS=`echo ${OBJ_TYPE} |wc |awk '{print $3}'`
+     if [[ ${OBJ_TYPE_CHARS} -ge ${OTC_MAX} ]] ; then
+        OTC_MAX=${OBJ_TYPE_CHARS}
+     fi
+
+   TMPSTR=`echo ${THIS_LINE} |cut -d"~" -f4 |sed 's/\"//g'`
+     CONST=`grep ${TMPSTR}"@" ${OBJ_CONSTS} |cut -d"~" -f1` 
+     CONST_CHARS=`echo ${CONST} |wc |awk '{print $3}'`
+     if [[ ${CONST_CHARS} -ge ${COC_MAX} ]] ; then
+        COC_MAX=${CONST_CHARS}
+     fi
+
+   OBJ_RA=`echo ${THIS_LINE} |cut -d"~" -f5 |sed 's/\"//g'`
+   OBJ_DEC=`echo ${THIS_LINE} |cut -d"~" -f6 |sed 's/\"//g'`
+   OBJ_MAG=`echo ${THIS_LINE} |cut -d"~" -f7 |sed 's/\"//g' |sed 's/ //g' |sed 's/p//g'`
+   OBJ_SIZE=`echo ${THIS_LINE} |cut -d"~" -f11 |sed 's/\"//g' |sed 's/ //g' |sed 's/m//g'`
+
+   if [[ ${DEBUG} != "0" ]] ; then
+      echo "     DEBUG: OBJECT NAME = ${OBJECT_NAME}, CHARS = ${OBJECT_NAME_CHARS}"
+      echo "     DEBUG: OBJECT TYPE = ${OBJ_TYPE}, CHARS = ${OBJ_TYPE_CHARS}"
+      echo "     DEBUG: CONSTELLATION = ${CONST}, CHARS = ${CONST_CHARS}"
+      echo "     DEBUG: RA = ${OBJ_RA}, DEC = ${OBJ_DEC}"
+      echo "     DEBUG: MAGNITUDE = ${OBJ_MAG}"
+      echo "     DEBUG: SIZE (arcmin) = ${OBJ_SIZE}"
+   fi
+
+   if [[ -z ${OBJ_SIZE} ]] ; then
+      OBJ_SIZE="0.0"
+      if [[ ${DEBUG} != "0" ]] ; then
+         echo "	   DEBUG: Blank size replaced with 0.0"
+      fi
+   fi
+   
+   OBJ_SIZE_SEC=`echo ${OBJ_SIZE}| grep -c "s"`
+   if [[ ${OBJ_SIZE_SEC} -gt 0 ]]  ; then
+      OBJ_SEC=`echo ${OBJ_SIZE} |sed 's/s//g'`
+      OBJ_SIZE=`printf %.3f "$((10**3 * ${OBJ_SEC}/60))e-3"`
+   fi
+
+   if [[ ${DEBUG} != "0" ]] ; then
+      echo ""
+   fi
+
+   let I=I+1
+done
+
+if [[ ${ONC_MAX} -le 7 ]] ; then
+   let ONC_MAX=8
+fi
+
+if [[ ${OTC_MAX} -le 7 ]] ; then
+   let OTC_MAX=8
+fi
+
+if [[ ${COC_MAX} -le 7 ]] ; then
+   let COC_MAX=17
+fi
+
+if [[ ${DEBUG} != "0" ]] ; then
+   echo "     DEBUG: ONC_MAX = ${ONC_MAX}"
+   echo "     DEBUG: OTC_MAX = ${OTC_MAX}"
+   echo "     DEBUG: COC_MAX = ${COC_MAX}"
+fi
+
+#================================================================================================
+#     OUTPUT
+#
+
+cat ${OUT_NAME} | sed 's/\"//g' |sort -b -t"~" -g -k ${SORT_FIELD} > ${OUT_NAME_FINAL}
+
+#echo ""
+#echo "    DEBUG: SORT_FIELD = ${SORT_FIELD}    OUT_NAME_FINAL=${OUT_NAME_FINAL}"
+#cat ${OUT_NAME_FINAL} |sed 's/~/\|/g' 
+#echo ""
+
+TITLE1="OBJECT"
+TITLE2="TYPE"
+TITLE3="CONSTELLATION"
+echo ""
+printf "%-${ONC_MAX}s   %-${OTC_MAX}s   %-${COC_MAX}s   RA            DEC        MAGNITUDE  SIZE(arcmin)\n" ${TITLE1} ${TITLE2} ${TITLE3}
+#printf "%-8s   %-9s   %-12s   RA      DEC     MAGNITUDE  SIZE(arcmin)\n" ${TITLE1} ${TITLE2} ${TITLE3}
+#     123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_
+#              10        20        30        40        50        60        70        80        90        100       110       120
+echo "----------------------------------------------------------------------------------------------------------------"
+
+LINES=`wc ${OUT_NAME_FINAL} |awk '{print $1}'`
+let I=1
+
+while [[ ${I} -le ${LINES} ]] ; do
+   THIS_LINE=`sed -n ${I}'p' ${OUT_NAME_FINAL} |sed 's/ //g'`
+
+   if [[ -z ${THIS_LINE} ]] ; then
+      #echo "    DEBUG: line skipped"
+      let I=I+1
+      continue
+   fi 
+	
+   OBJECT_NAME=`echo ${THIS_LINE} |cut -d"~" -f1 |sed 's/\"//g' |sed 's/ //g'`
+   ALT_NAME=`echo ${THIS_LINE} |cut -d"~" -f2 |sed 's/\"//g' |sed 's/ //g'`
+
+   TMPSTR=`echo ${THIS_LINE} |cut -d"~" -f3 |sed 's/\"//g' |sed 's/ //g'`
+     OBJ_TYPE=`grep ${TMPSTR} ${OBJ_TYPES} |cut -d"," -f2`
+
+   #echo "    DEBUG: here3"
+   TMPSTR=`echo ${THIS_LINE} |cut -d"~" -f4 |sed 's/\"//g' |sed 's/ //g'`
+     OBJ_CONST=`grep "${TMPSTR}@" ${OBJ_CONSTS} |cut -d"~" -f1`
+
+   RA=`echo ${THIS_LINE} |cut -d"~" -f5 |sed 's/\"//g' |sed 's/h /h/g' |sed 's/ /h/g'`
+   DEC=`echo ${THIS_LINE} |cut -d"~" -f6 |sed 's/\"//g'|sed 's/ /d/g'`
+   MAG=`echo ${THIS_LINE} |cut -d"~" -f7 |sed 's/\"//g' |sed 's/ //g'`
+   SIZE=`echo ${THIS_LINE} |cut -d"~" -f11 |sed 's/\"//g' |sed 's/ //g' |sed 's/m//g'`
+
+
+   printf "%-${ONC_MAX}s   %-${OTC_MAX}s   %-${COC_MAX}s     %-9s      %-7s     %-4s       %-4s\n" ${OBJECT_NAME} ${OBJ_TYPE} ${OBJ_CONST} ${RA} ${DEC} ${MAG} ${SIZE}
+   let I=I+1
+done
+
+
+#cat ${OUT_NAME_FINAL} |sed 's/\"//g' |sed 's/~//g'
+echo ""
+
+exit 0
