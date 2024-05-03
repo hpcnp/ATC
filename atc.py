@@ -29,7 +29,7 @@ scopes_file = "/Users/christopherporter/Desktop/ASTRO/ATC/scopes.dat"
 cameras_file = "/Users/christopherporter/Desktop/ASTRO/ATC/cameras.dat"
 astro_db_file = "/Users/christopherporter/Desktop/ASTRO/ATC/astro_db.dat"
 LOG = "/Users/christopherporter/Desktop/ASTRO/ATC/atc.log"
-DEBUG = "YES"
+DEBUG = 2               # DEBUG 0,1,2,3   0 - no debug output, 1-3 more and more verbose output
 # 
 # Preferences
 max_obj_magnitude = 14.0    # minimum brightness
@@ -52,7 +52,7 @@ today_date = datetime.now()
 
 #
 # Open the header in the log file
-log_file.write("============================  Start Run of Astro Target Cooser [ATC] ============================")
+log_file.write("============================  Start Run of Astro Target Chooser [ATC] ============================")
 log_file.write(f"                                {today_date}\n")
 
 year = today_date.year
@@ -66,7 +66,8 @@ if month < 10:
 else:
    date_yyyymmdd = str(year) + "-" + str(month) + "-" + str(day)
 
-# DEBUG : print(f"DATE (short):",date_yyyymmdd,"DATE:",date,"  YEAR:",year,"  MONTH:",month,"  DAY:",day,"  HOUR:",hour,"  MINUTE:",minute)
+if DEBUG >= 2:
+    log_file.write(f"   DATE (short): {date_yyyymmdd} DATE: {date}  YEAR: {year}  MONTH: {month}  DAY: {day}  HOUR: {hour}  MINUTE: {minute}")
 #
 # MOON CALCULATIONS =====================================================================================================================================
 #
@@ -117,7 +118,8 @@ def calculate_moon_phase(year, month, day, hour, latitude, longitude):
     return moon_phase, moon_pct 
 
 moon_phase, moon_pct = calculate_moon_phase(year, month, day, hour, latitude, longitude)
-# DEBUG print(f"On {month}/{day}/{year} at {hour:02.2f} hours, the moon will be in the {moon_phase} phase at {moon_pct:02.1f} % full.")
+if DEBUG >= 1:
+    log_file.write(f"   On {month}/{day}/{year} at {hour:02.2f} hours, the moon will be in the {moon_phase} phase at {moon_pct:02.1f} % full.")
 #
 #   Moon Location in the sky  ---------------------------------------------------------------------------------------------------------
 
@@ -138,7 +140,7 @@ def calculate_moon_ra_dec(year, month, day, hour, minute, second, latitude, long
     Returns:
     float, float: The right ascension (RA) and declination (Dec) of the moon in degrees.
     """
-    print("  ... Calculating moon location")
+    print("  ... Calculating moon location for tonight")
 
     # Convert the date and time to a datetime object
     date_time = datetime(year, month, day, hour, minute, second)
@@ -167,7 +169,7 @@ ra, dec = calculate_moon_ra_dec(year, month, day, hour, minute, second, latitude
 # DEBUG print(f"On {month}/{day}/{year} at {hour:02d}:{minute:02d}:{second:02d}, the moon's right ascension is {ra:.2f} degrees and its declination is {dec:.2f} degrees.")
 
 #
-# Astronomy time available tonight - astro sunset to sunrise =============================================================================================k
+# Astronomy time available tonight - astro sunset to sunrise =============================================================================================
 
 import datetime
 from astronomica import *
@@ -180,18 +182,20 @@ def get_astronomical_night():
     sun = Sun(latitude, longitude)
     sunset_time = sun.get_local_sunset_time(datetime.datetime.now())
     sunset_time_str = sunset_time.strftime("%H:%M")
-    #print(f"\n\nThe local sunset time is {sunset_time_str}")
+    if DEBUG >=2:
+        log_file.write(f"   The local sunset time is {sunset_time_str}")
 
     # Calculate duration of the day in hours and minutes
     #day_duration = datetime.timedelta(hours=24) - datetime.timedelta(hours=sunset_time.hour, minutes=sunset_time.minute)
     sunrise_time = sun.get_local_sunrise_time(datetime.datetime.now())
     day_duration =  datetime.timedelta(hours=sunset_time.hour, minutes=sunset_time.minute) - datetime.timedelta(hours=sunrise_time.hour, minutes=sunrise_time.minute)
-    print(f"      DEBUG: day_duration: {day_duration}")
+    if DEBUG >= 1:
+        log_file.write(f"   Day_duration: {day_duration}")
 
     day_duration_hours, day_duration_minutes = divmod(day_duration.seconds // 60, 60)
 
     # Calculate the duration of astronomical twilight as a timedelta object
-    twilight_duration = datetime.timedelta(minutes=day_duration.total_seconds() * 0.2666 / 60)
+    twilight_duration = datetime.timedelta(minutes = day_duration.total_seconds() * 0.2666 / 60.0 )
 
     # Calculate the duration of astronomical night as a timedelta object
     night_duration =  day_duration - twilight_duration
@@ -202,7 +206,9 @@ def get_astronomical_night():
     # Format the time of astronomical night as a string in the format "HH:MM"
     night_time_str = night_time.strftime("%H:%M")
 
-    print(f"    The start time of astronomical night tonight is {night_time_str}")
+    print(f"      The start time of astronomical night tonight is {night_time_str}")
+    if DEBUG >= 1:
+        log_file.write(f"     The start time of astronomical night tonight is {night_time_str}")
 
     tomorrow_date = datetime.date.today() + datetime.timedelta(days=1)
     sunrise_time = sun.get_local_sunrise_time(tomorrow_date)
@@ -215,7 +221,9 @@ def get_astronomical_night():
     #print(f"Twilight duration is: {twilight_duration}")
 
     print(f"    The time of astronomical night ends tomrrow is {dawn_time_str}")
-    print(f"      DEBUG: The local sunrise time tomorrow is {sunrise_time_str}")
+    if DEBUG >= 1:
+        log_file.write(f"   The time of astronomical night ends tomrrow is {dawn_time_str}")
+        log_file.write(f"   The local sunrise time tomorrow is {sunrise_time_str}\n")
 
 get_astronomical_night()
 
@@ -227,11 +235,14 @@ import math
 
 # READ INPUT FILES ===================================================================================================================
 #
-#print("SCOPES")
+print("\n")
 print("  ...Reading SCOPES.dat")
 scopes_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/SCOPES.dat')
-#print(scopes_dataframe)
-#print("\n\n")
+
+if DEBUG >= 3:
+    log_file.write("SCOPES")
+    print(scopes_dataframe)
+    log_file.write("\n")
 
 # Scope Fields
 #  1- Label, 
@@ -240,11 +251,14 @@ scopes_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/SCOPE
 #  4- Reducer (factor), 
 #  5- Reducer On Scope (YES/NO)
 
+print("\n")
 print("  ...Reading CAMERAS.dat")
-#print("CAMERAS")
 cameras_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/CAMERAS.dat')
-#print(cameras_dataframe)
-#print("\n\n")
+
+if DEBUG >= 3:
+    log_file.write("CAMERAS")
+    print(cameras_dataframe)
+    log_file.write("\n")
 
 # Camera Fields
 #  1- Label, 
@@ -256,30 +270,43 @@ cameras_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/CAME
 #  7- Cooled (YES,NO)
 #  8- Imaging (YES,NO)
 
+print("\n")
 print("  ..Reading objects DB")
-objects_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/astro_db.dat')
+objects_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/astro_db2.dat')
 print("  ..Done Reading objects DB")
-# print out the stats about the dataframe
-#objects_dataframe.info()
+print("\n")
+
+if DEBUG >= 3:
+    # print out the stats about the dataframe
+    print("\n")
+    log_file.write("OBJECTS")
+    objects_dataframe.info()
+    log_file.write("\n")
+    print("\n")
+
 
 # DB Fields
-#  1- Label 1, 
-#  2- Label 2, 
-#  3- Constellation, 
-#  4- Magnitude, 
-#  5- Season, 
-#  6- Size (arcmin), 
-#  7- RA, 
-#  8- Dec, 
-#  9- Type, 
-#  10- Notes
+#  0- Label 1, 
+#  1- Label 2, 
+#  2- Constellation, 
+#  3- Magnitude, 
+#  4- Season, 
+#  5- Size (arcmin), 
+#  6- RA, 
+#  7- Dec, 
+#  8- Type, 
+#  9- Notes
 
 # =======================================================================================================================================================
-# Calculate Filed of View for each scope and camera combination
+# Calculate Field of View for each scope and camera combination
 # Loop through cameras
 for camera, row in cameras_dataframe.iterrows():
     if str(cameras_dataframe.loc[camera,'imaging']) == "NO":
-        print(f"      DEBUG: Camera: {cameras_dataframe.loc[camera,'label']} - Skipping, not a DSO imaging camera")
+        if DEBUG >= 1:
+            log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']} - Skipping, not a DSO imaging camera")
+        if DEBUG >= 2:
+            print(f"     Camera: {cameras_dataframe.loc[camera,'label']},  - Skipping, not a DSO imaging camera")
+
         continue
     # Loop through scopes
     for scope, row in scopes_dataframe.iterrows():
@@ -289,13 +316,20 @@ for camera, row in cameras_dataframe.iterrows():
         vert_sensor_size = 0.001 * cameras_dataframe.loc[camera,'pix_size'] * cameras_dataframe.loc[camera,'vert_pix']
         horz_sensor_size = 0.001 * cameras_dataframe.loc[camera,'pix_size'] * cameras_dataframe.loc[camera,'horz_pix']
         field_of_view =  (3436.0 * math.sqrt(vert_sensor_size**2 + horz_sensor_size**2)) / scopes_dataframe.loc[scope,'focal_length_mm']
-        print(f"      DEBUG: Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']}, field of view (arcmin): {field_of_view:.3f}")
+        if DEBUG >=1:
+            log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']}, field of view (arcmin): {field_of_view:.3f}")
+        if DEBUG >=2:
+            print(f"     Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']}, field of view (arcmin): {field_of_view:.3f}")
 
         # Arcsec per pixel =(PS/FL)∗206.265
         # PS is the pixel size (microns)
         # FL is the focal length (mm)
         arcsec_per_pixel = (206.265 * cameras_dataframe.loc[camera,'pix_size']) / scopes_dataframe.loc[scope,'focal_length_mm']
-        print(f"      DEBUG: Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']},     arcsec per pixel: {arcsec_per_pixel:.3f}")
+        if DEBUG >= 1:
+            log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']},     arcsec per pixel: {arcsec_per_pixel:.3f}")
+            log_file.write("\n")
+        if DEBUG >=2:
+            print(f"     Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']},  arcsec per pixel: {arcsec_per_pixel:.3f}")
 
         #tmp_data = {cameras_dataframe.loc[camera,0]: [scopes_dataframe.loc[scope,0], field_of_view, arcsec_per_pixel]}
 
@@ -310,17 +344,21 @@ for camera, row in cameras_dataframe.iterrows():
  #       5) min angle to the moon not reached
  #       6) min elevation insufficient
  #       7) moon phase too high 
- for object, row in objects_dataframe.iterrows():
+
+print("  ...Looping through object DB and eliminating those that violate constraints")
+ 
+for object, row in objects_dataframe.iterrows():
     # magnitude
     object_magnitude = objects_dataframe.loc[object,'magnitude']
-    if object_magnitude > max_obj_magnitude:
+
+    if float(object_magnitude) > max_obj_magnitude:
         continue
 
     # max size
     object_size = objects_dataframe.loc[object,'size']
-    if object_size > max_obj_size:
+    if float(object_size) > max_obj_size:
         continue
-    if object_size < min_obj_size:
+    if float(object_size) < min_obj_size:
         continue
 
     # max moon phase
@@ -328,6 +366,10 @@ for camera, row in cameras_dataframe.iterrows():
         continue
 
     # min moon angle to the object
+    if DEBUG >= 1:
+        log_file.write("   Angle between the moon and the object")
+    if DEBUG >= 2:
+        print("      Angle between the moon and the object")
 
     observer = ephem.Observer()
     observer.lat = str(latitude)
@@ -339,21 +381,75 @@ for camera, row in cameras_dataframe.iterrows():
     moon_RA = (moon.ra * 12) / ephem.pi
     moon_DEC = (moon.dec * 180) / ephem.pi
 
-    obj_label = objects_dataframe.loc[object,'label']
+    obj_label = objects_dataframe.loc[object,'label1']
     obj_RA = objects_dataframe.loc[object,'RA']
     obj_DEC = objects_dataframe.loc[object,'DEC']
 
-    print(f"   DEBUG: From DB Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
+    if DEBUG >= 1:
+        log_file.write(f"   From DB Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
+    if DEBUG >= 2:
+        print(f"      From DB Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
 
     obj_center = SkyCoord.from_name(str(obj_label))
     obj_RA = obj_center.ra   # in deg
     obj_DEC = obj_center.dec # in deg
 
-    print(f"   DEBUG: From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
+    if DEBUG >= 1:
+        log_file.write(f"   From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
+    if DEBUG >= 2:
+        print(f"      From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
 
     # θ = arccos(sin(Dec1) * sin(Dec2) + cos(Dec1) * cos(Dec2) * cos(RA1 - RA2))
     angle_to_moon = math.acos(sin(moon_DEC) * math.sin(obj_DEC) + math.cos(moon_DEC) * math.cos(obj_DEC) * math.cos(moon_RA - obj_RA))
-    print(f"   DEBUG: Angle between {obj_label} and Moon is {angle_to_moon}")
+    if DEBUG >= 1:
+        log_file.write(f"   Angle between {obj_label} and Moon is {angle_to_moon}")
+    if DEBUG >= 2:
+        print(f"      Angle between {obj_label} and Moon is {angle_to_moon}")
     
     if angle_to_moon < min_moon_angle:
         continue
+
+    #
+    # Duration above minimum altitude
+    import numpy as np
+    import astropy.units as u
+    from astropy.coordinates import SkyCoord, AltAz, EarthLocation, SiderealTime
+
+    if DEBUG >= 1:
+        log_file.write(f"   Checking minimum visible time ({min_time_up} hours) above minimum altitude ({min_altitude} deg.)")
+
+    n = 27
+    hours_visible = 0
+
+    for i in range(20, n):
+        if i > 23:
+            mil_hour = i - 24
+        else:
+            mil_hour = i
+        mil_time = str(mil_hour) + ":00:00"
+
+        # Calculate the altitude of the object at this time
+        coord = SkyCoord(ra=obj_RA * u.degree, dec=obj_DEC * u.degree, frame='icrs')
+        observer = EarthLocation(lat=latitude*u.degree, lon=longitude * u.degree)
+        local_siderial_time = SiderealTime.from_time(mil_time, observer.lon).value * u.hour
+
+        altaz_frame = AltAz(location=observer, obstime=local_siderial_time)
+        altaz = coord.transform_to(altaz_frame)
+
+        obj_ALT = altaz.alt.value
+        obj_AZ  = altaz.az.value 
+
+        if DEBUG >= 1:
+            log_file.write(f"      Object RA: {obj_RA}, Object DEC: {obj_DEC}, Object ALT: {obj_ALT}, Object AZ: {obj_AZ}")
+
+        if obj_ALT >= min_altitude:
+            hours_visible = hours_visible + 1
+            if DEBUG >= 2:
+                log_file.write(f"       Above min ALT {min_altitude}. Added to hours_visible {hours_visible}")
+
+    if hours_visible < min_time_up:
+        continue
+    
+    print(f"  Object passing filter: {obj_label}")
+    #
+    # Duration above minimum altitude

@@ -43,8 +43,8 @@ def get_astronomical_night():
     dawn_time = sunrise_time - (twilight_duration / 2.4)
     dawn_time_str = dawn_time.strftime("%H:%M")
     
-    #print(f"\nTotal night duration is: {night_duration}")
-    #print(f"Twilight duration is: {twilight_duration}")
+    print(f"\nTotal night duration is: {night_duration}")
+    print(f"Twilight duration is: {twilight_duration}")
 
     print(f"\nThe time of astronomical night ends tomrrow is {dawn_time_str}")
     print(f"The local sunrise time tomorrow is {sunrise_time_str}")
