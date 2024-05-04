@@ -5,7 +5,7 @@
 from datetime import date, datetime, timedelta
 import numpy as np
 import scipy
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz, ICRS, get_sun, get_moon
 from astropy.time import Time
 import astropy.units as u
 import astroplan
@@ -27,7 +27,7 @@ elevation = 22.0           # Elevation (meters)
 bortle_class = 7          # integer see https://www.lightpollutionmap.info/
 scopes_file = "/Users/christopherporter/Desktop/ASTRO/ATC/scopes.dat"
 cameras_file = "/Users/christopherporter/Desktop/ASTRO/ATC/cameras.dat"
-astro_db_file = "/Users/christopherporter/Desktop/ASTRO/ATC/astro_db.dat"
+astro_db_file = "/Users/christopherporter/Desktop/ASTRO/ATC/astro_db3.dat"
 LOG = "/Users/christopherporter/Desktop/ASTRO/ATC/atc.log"
 DEBUG = 2               # DEBUG 0,1,2,3   0 - no debug output, 1-3 more and more verbose output
 # 
@@ -272,7 +272,7 @@ if DEBUG >= 3:
 
 print("\n")
 print("  ..Reading objects DB")
-objects_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/astro_db2.dat')
+objects_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/astro_db3.dat')
 print("  ..Done Reading objects DB")
 print("\n")
 
@@ -386,39 +386,58 @@ for object, row in objects_dataframe.iterrows():
     obj_DEC = objects_dataframe.loc[object,'DEC']
 
     if DEBUG >= 1:
-        log_file.write(f"   From DB Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
+        log_file.write(f"   From DB Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC:.4f} deg.")
     if DEBUG >= 2:
-        print(f"      From DB Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
+        print(f"        From DB Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC:.4f} deg.")
 
     obj_center = SkyCoord.from_name(str(obj_label))
-    obj_RA = obj_center.ra   # in deg
-    obj_DEC = obj_center.dec # in deg
+    obj_RA = obj_center.ra.value   # in deg
+    obj_DEC = obj_center.dec.value # in deg
 
     if DEBUG >= 1:
-        log_file.write(f"   From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
+        log_file.write(f"   From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC} deg.")
     if DEBUG >= 2:
-        print(f"      From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA}, DEC: {obj_RA}")
+        print(f"        From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC} deg.")
+
+    #
+    # Python math.<trig_function> uses radians instead of degrees - so convert the quantities to radians
+    obj_RA_rad = ( math.pi / 180.0 ) * obj_RA
+    obj_DEC_rad = ( math.pi / 180.0 ) * obj_DEC
+    moon_RA_rad = ( math.pi / 180.0 ) * moon_RA
+    moon_DEC_rad = ( math.pi / 180.0 ) * moon_DEC
+
 
     # θ = arccos(sin(Dec1) * sin(Dec2) + cos(Dec1) * cos(Dec2) * cos(RA1 - RA2))
-    angle_to_moon = math.acos(sin(moon_DEC) * math.sin(obj_DEC) + math.cos(moon_DEC) * math.cos(obj_DEC) * math.cos(moon_RA - obj_RA))
+    angle_to_moon_rad = math.acos(math.sin(moon_DEC_rad) * math.sin(obj_DEC_rad) + math.cos(moon_DEC_rad) * math.cos(obj_DEC_rad) * math.cos(moon_RA_rad - obj_RA_rad))
+    angle_to_moon = (180.0 / math.pi) * angle_to_moon_rad # convert back to degrees
+
     if DEBUG >= 1:
-        log_file.write(f"   Angle between {obj_label} and Moon is {angle_to_moon}")
+        log_file.write(f"   From Ephem: Moon, RA: {moon_RA:.4f} deg., DEC: {moon_DEC:.4f} deg., Fullness: {moon_pct:.4f}%")
+        log_file.write(f"     Angle between {obj_label} and Moon is {angle_to_moon}")
     if DEBUG >= 2:
-        print(f"      Angle between {obj_label} and Moon is {angle_to_moon}")
+        print(f"        Angle between {obj_label} and Moon is {angle_to_moon}")
     
     if angle_to_moon < min_moon_angle:
         continue
 
-    #
+    # ---------------------------------------------------------------------------------------------------------------------------------
     # Duration above minimum altitude
-    import numpy as np
-    import astropy.units as u
-    from astropy.coordinates import SkyCoord, AltAz, EarthLocation, SiderealTime
-
     if DEBUG >= 1:
         log_file.write(f"   Checking minimum visible time ({min_time_up} hours) above minimum altitude ({min_altitude} deg.)")
+    if DEBUG >= 2:
+        print("      Duration above minimum altitude")
 
-    n = 27
+    observer_location = EarthLocation(lat=latitude*u.deg, lon=longitude*u.deg)
+    time = Time(today_date)
+    aspy_object = SkyCoord.from_name(obj_label)
+    alt_az = aspy_object.transform_to(AltAz(obstime=time, location=observer_location))
+    
+    altitude = alt_az.alt.value # in deg
+    azimuth = alt_az.az.value # in deg
+
+    print(f"       At {time} {obj_label} is at: Altitude: {altitude:3f} Azimuth: {azimuth:3f}")
+
+    n = 29
     hours_visible = 0
 
     for i in range(20, n):
@@ -428,28 +447,38 @@ for object, row in objects_dataframe.iterrows():
             mil_hour = i
         mil_time = str(mil_hour) + ":00:00"
 
+        query_date = str(year) + "-" + str(month) + "-" + str(day)
+        query_time = str(query_date) + " " + str(mil_time)
+
         # Calculate the altitude of the object at this time
-        coord = SkyCoord(ra=obj_RA * u.degree, dec=obj_DEC * u.degree, frame='icrs')
-        observer = EarthLocation(lat=latitude*u.degree, lon=longitude * u.degree)
-        local_siderial_time = SiderealTime.from_time(mil_time, observer.lon).value * u.hour
+        observer_location = EarthLocation(lat=latitude*u.deg, lon=longitude*u.deg)
+        time = Time(query_time)
+        aspy_object = SkyCoord.from_name(obj_label)
+        alt_az = aspy_object.transform_to(AltAz(obstime=time, location=observer_location))
+    
+        altitude = alt_az.alt.value # in deg
+        azimuth = alt_az.az.value # in deg
 
-        altaz_frame = AltAz(location=observer, obstime=local_siderial_time)
-        altaz = coord.transform_to(altaz_frame)
-
-        obj_ALT = altaz.alt.value
-        obj_AZ  = altaz.az.value 
+        print(f"       Loop: At {time} {obj_label} is at: Altitude: {altitude:3f} Azimuth: {azimuth:3f} hours_visible: {hours_visible}")
 
         if DEBUG >= 1:
-            log_file.write(f"      Object RA: {obj_RA}, Object DEC: {obj_DEC}, Object ALT: {obj_ALT}, Object AZ: {obj_AZ}")
+            log_file.write(f"      Object RA: {obj_RA}, Object DEC: {obj_DEC}, Object ALT: {altitude}, Object AZ: {azimuth}")
 
-        if obj_ALT >= min_altitude:
+        if altitude >= min_altitude:
             hours_visible = hours_visible + 1
             if DEBUG >= 2:
                 log_file.write(f"       Above min ALT {min_altitude}. Added to hours_visible {hours_visible}")
 
     if hours_visible < min_time_up:
         continue
+
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    #   Apparent magnitude filter
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    #   Object type filter
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    #   Size filter
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    #   Other filter
     
     print(f"  Object passing filter: {obj_label}")
-    #
-    # Duration above minimum altitude
