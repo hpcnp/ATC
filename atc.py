@@ -42,6 +42,7 @@ min_time_up = 2.5       # hours that the object will be above min height
 min_altitude = 30.0     # minimum altitude above horizon (deg)
 max_moon_pct = 100.0    # maximum moon phase.  Set to 100.0 to disable
 min_moon_angle = 25.0   # min angle between object and the moon (deg)
+timezone_offset = 7
 preferred_types = ['galaxy', 'emission nebula', 'reflection nebula', 'bright nebula', 'supernova']
 discarded_types = ['star', 'open clus', 'asterism', 'diffuse', 'existant', 'open cluster']
 narrow_types = ['nebula', 'supernova']
@@ -58,7 +59,7 @@ today_date = datetime.now()
 
 #
 # Open the header in the log file
-log_file.write("============================  Start Run of Astro Target Chooser [ATC] ============================")
+log_file.write("============================  Start Run of Astro Target Chooser [ATC] ============================\n")
 log_file.write(f"                                {today_date}\n")
 
 year = today_date.year
@@ -79,7 +80,7 @@ else:
    date_yyyymmdd = str(year) + "-" + str(month) + "-" + str(day)
 
 if DEBUG >= 2:
-    log_file.write(f"   DATE (short): {date_yyyymmdd} DATE: {date}  YEAR: {year}  MONTH: {month}  DAY: {day}  HOUR: {hour}  MINUTE: {minute}")
+    log_file.write(f"   DATE (short): {date_yyyymmdd} DATE: {date}  YEAR: {year}  MONTH: {month}  DAY: {day}  HOUR: {hour}  MINUTE: {minute}\n")
 #
 # MOON CALCULATIONS =====================================================================================================================================
 #
@@ -131,7 +132,7 @@ def calculate_moon_phase(year, month, day, hour, latitude, longitude):
 
 moon_phase, moon_pct = calculate_moon_phase(year, month, day, hour, latitude, longitude)
 if DEBUG >= 1:
-    log_file.write(f"   On {month}/{day}/{year} at {hour:02.2f} hours, the moon will be in the {moon_phase} phase at {moon_pct:02.1f} % full.")
+    log_file.write(f"   On {month}/{day}/{year} at {hour:02.2f} hours, the moon will be in the {moon_phase} phase at {moon_pct:02.1f} % full.\n")
 #
 #   Moon Location in the sky  ---------------------------------------------------------------------------------------------------------
 
@@ -195,14 +196,14 @@ def get_astronomical_night():
     sunset_time = sun.get_local_sunset_time(datetime.datetime.now())
     sunset_time_str = sunset_time.strftime("%H:%M")
     if DEBUG >=2:
-        log_file.write(f"   The local sunset time is {sunset_time_str}")
+        log_file.write(f"   The local sunset time is {sunset_time_str}\n")
 
     # Calculate duration of the day in hours and minutes
     #day_duration = datetime.timedelta(hours=24) - datetime.timedelta(hours=sunset_time.hour, minutes=sunset_time.minute)
     sunrise_time = sun.get_local_sunrise_time(datetime.datetime.now())
     day_duration =  datetime.timedelta(hours=sunset_time.hour, minutes=sunset_time.minute) - datetime.timedelta(hours=sunrise_time.hour, minutes=sunrise_time.minute)
     if DEBUG >= 1:
-        log_file.write(f"   Day_duration: {day_duration}")
+        log_file.write(f"   Day_duration: {day_duration}\n")
 
     day_duration_hours, day_duration_minutes = divmod(day_duration.seconds // 60, 60)
 
@@ -220,7 +221,7 @@ def get_astronomical_night():
 
     print(f"      The start time of astronomical night tonight is {night_time_str}")
     if DEBUG >= 1:
-        log_file.write(f"     The start time of astronomical night tonight is {night_time_str}")
+        log_file.write(f"     The start time of astronomical night tonight is {night_time_str}\n")
 
     tomorrow_date = datetime.date.today() + datetime.timedelta(days=1)
     sunrise_time = sun.get_local_sunrise_time(tomorrow_date)
@@ -234,7 +235,7 @@ def get_astronomical_night():
 
     print(f"    The time of astronomical night ends tomrrow is {dawn_time_str}")
     if DEBUG >= 1:
-        log_file.write(f"   The time of astronomical night ends tomrrow is {dawn_time_str}")
+        log_file.write(f"   The time of astronomical night ends tomrrow is {dawn_time_str}\n")
         log_file.write(f"   The local sunrise time tomorrow is {sunrise_time_str}\n")
 
 get_astronomical_night()
@@ -252,7 +253,7 @@ print("  ...Reading SCOPES.dat")
 scopes_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/SCOPES.dat')
 
 if DEBUG >= 3:
-    log_file.write("SCOPES")
+    log_file.write("SCOPES\n")
     print(scopes_dataframe)
     log_file.write("\n")
 
@@ -268,7 +269,7 @@ print("  ...Reading CAMERAS.dat")
 cameras_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/CAMERAS.dat')
 
 if DEBUG >= 3:
-    log_file.write("CAMERAS")
+    log_file.write("CAMERAS\n")
     print(cameras_dataframe)
     log_file.write("\n")
 
@@ -291,7 +292,7 @@ print("\n")
 if DEBUG >= 3:
     # print out the stats about the dataframe
     print("\n")
-    log_file.write("OBJECTS")
+    log_file.write("OBJECTS\n")
     objects_dataframe.info()
     log_file.write("\n")
     print("\n")
@@ -315,7 +316,7 @@ if DEBUG >= 3:
 for camera, row in cameras_dataframe.iterrows():
     if str(cameras_dataframe.loc[camera,'imaging']) == "NO":
         if DEBUG >= 1:
-            log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']} - Skipping, not a DSO imaging camera")
+            log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']} - Skipping, not a DSO imaging camera\n")
         if DEBUG >= 2:
             print(f"     Camera: {cameras_dataframe.loc[camera,'label']},  - Skipping, not a DSO imaging camera")
 
@@ -329,7 +330,7 @@ for camera, row in cameras_dataframe.iterrows():
         horz_sensor_size = 0.001 * cameras_dataframe.loc[camera,'pix_size'] * cameras_dataframe.loc[camera,'horz_pix']
         field_of_view =  (3436.0 * math.sqrt(vert_sensor_size**2 + horz_sensor_size**2)) / scopes_dataframe.loc[scope,'focal_length_mm']
         if DEBUG >=1:
-            log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']}, field of view (arcmin): {field_of_view:.3f}")
+            log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']}, field of view (arcmin): {field_of_view:.3f}\n")
         if DEBUG >=2:
             print(f"     Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']}, field of view (arcmin): {field_of_view:.3f}")
 
@@ -338,7 +339,7 @@ for camera, row in cameras_dataframe.iterrows():
         # FL is the focal length (mm)
         arcsec_per_pixel = (206.265 * cameras_dataframe.loc[camera,'pix_size']) / scopes_dataframe.loc[scope,'focal_length_mm']
         if DEBUG >= 1:
-            log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']},     arcsec per pixel: {arcsec_per_pixel:.3f}")
+            log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']},     arcsec per pixel: {arcsec_per_pixel:.3f}\n")
             log_file.write("\n")
         if DEBUG >=2:
             print(f"     Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']},  arcsec per pixel: {arcsec_per_pixel:.3f}")
@@ -392,7 +393,7 @@ for object, row in objects_dataframe.iterrows():
 
     if float(object_magnitude) > max_obj_magnitude:
         if DEBUG >= 1:
-            log_file.write(f"   ELIMINATED {obj_label} for being too feint at magnitude {object_magnitude}")
+            log_file.write(f"   ELIMINATED {obj_label} for being too feint at magnitude {object_magnitude}\n")
         if DEBUG >= 2:
             print(f"      ELIMINATED {obj_label} for being too feint at magnitude {object_magnitude}")
 
@@ -405,21 +406,21 @@ for object, row in objects_dataframe.iterrows():
     obj_score2 = ( float(object_size) / max_obj_size ) * 10.0
     if float(object_size) > max_obj_size:
         if DEBUG >= 1:
-            log_file.write(f"   ELIMINATED {obj_label} for being too large at {object_size} arcmin.")
+            log_file.write(f"   ELIMINATED {obj_label} for being too large at {object_size} arcmin.\n")
         if DEBUG >= 2:
             print(f"      ELIMINATED {obj_label} for being too large at {object_size} arcmin.")
         continue
 
     if float(object_size) < min_obj_size:
         if DEBUG >= 1:
-            log_file.write(f"   ELIMINATED {obj_label} for being too small at {object_size} arcmin.")
+            log_file.write(f"   ELIMINATED {obj_label} for being too small at {object_size} arcmin.\n")
         if DEBUG >= 2:
             print(f"      ELIMINATED {obj_label} for being too small at {object_size} arcmin.")
         continue
 
     # ---------------------------------------------------------------------------------------------------------------------------------
     #   max moon phase filter
-    obj_score5 = 1.0
+    obj_score5 = 7.5 * math.cos((math.pi / 2.0) * (moon_pct / 100.0))
 
     if moon_pct > 40.0:
         # narrow band targets get bumps up in score
@@ -428,12 +429,12 @@ for object, row in objects_dataframe.iterrows():
             obj_type = objects_dataframe.loc[object,'type']
 
             if (n_type.lower() in obj_type.lower()):
-                obj_score5 = 3.0 + (moon_pct - 30.0)/10.0
+                obj_score5 = 10.0 * math.cos((math.pi / 2.0) * (moon_pct / 100.0)) 
                 break
 
     if moon_pct > max_moon_pct:
         if DEBUG >= 1:
-            log_file.write(f"   ELIMINATED {obj_label} because the moon phase {moon_pct} % is higher than threshold {max_moon_pct}%")
+            log_file.write(f"   ELIMINATED {obj_label} because the moon phase {moon_pct} % is higher than threshold {max_moon_pct}%\n")
         if DEBUG >= 2:
             print(f"      ELIMINATED {obj_label} because the moon phase {moon_pct} % is higher than threshold {max_moon_pct}%")
         # ********* 
@@ -461,7 +462,7 @@ for object, row in objects_dataframe.iterrows():
         obj_DEC = obj_center.dec.value # in deg
 
         if DEBUG >= 1:
-            log_file.write(f"   From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA:.3f} deg., DEC: {obj_DEC:.3f} deg.")
+            log_file.write(f"   From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA:.3f} deg., DEC: {obj_DEC:.3f} deg.\n")
         if DEBUG >= 3:
             print(f"        From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA:.3f} deg., DEC: {obj_DEC:.3f} deg.")
 
@@ -471,7 +472,7 @@ for object, row in objects_dataframe.iterrows():
         obj_DEC = objects_dataframe.loc[object,'DEC']
 
         if DEBUG >= 1:
-            log_file.write(f"   From DB Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC:.4f} deg.")
+            log_file.write(f"   From DB Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC:.4f} deg.\n")
         if DEBUG >= 2:
             print(f"        From DB Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC:.4f} deg.")
 
@@ -490,14 +491,14 @@ for object, row in objects_dataframe.iterrows():
     obj_score3 = 10.0 * math.cos(angle_to_moon_rad)
 
     if DEBUG >= 2:
-        log_file.write(f"   From Ephem: Moon, RA: {moon_RA:.4f} deg., DEC: {moon_DEC:.4f} deg., Fullness: {moon_pct:.4f}%")
-        log_file.write(f"     Angle between {obj_label} and Moon is {angle_to_moon:.3f}")
+        log_file.write(f"   From Ephem: Moon, RA: {moon_RA:.4f} deg., DEC: {moon_DEC:.4f} deg., Fullness: {moon_pct:.1f}%\n")
+        log_file.write(f"     Angle between {obj_label} and Moon is {angle_to_moon:.3f}\n")
     if DEBUG >= 3:
         print(f"      Angle between {obj_label} and Moon is {angle_to_moon:.3f}")
     
     if angle_to_moon < min_moon_angle:
         if DEBUG >= 1:
-            log_file.write(f"   ELIMINATED: Angle between the moon and the object {angle_to_moon} deg. is too low. Threshold is {min_moon_angle} deg")
+            log_file.write(f"   ELIMINATED: Angle between the moon and the object {angle_to_moon} deg. is too low. Threshold is {min_moon_angle} deg\n")
         if DEBUG >= 2:
             print(f"      ELIMINATED: Angle between the moon and the object {angle_to_moon} deg. is too low. Threshold is {min_moon_angle} deg")
         continue
@@ -509,7 +510,7 @@ for object, row in objects_dataframe.iterrows():
         obj_type = objects_dataframe.loc[object,'type']
         if (dtype.lower() in obj_type.lower()):
             if DEBUG >= 1:
-                log_file.write(f"    Discarded {obj_label} because it is a discard type")
+                log_file.write(f"    Discarded {obj_label} because it is a discard type\n")
             if DEBUG >= 2:
                 print(f"        Discarded {obj_label} with type: {obj_type} because this is a discarded type {dtype}")
             skip_obj = "YES"
@@ -520,21 +521,24 @@ for object, row in objects_dataframe.iterrows():
     # ---------------------------------------------------------------------------------------------------------------------------------
     # Duration above minimum altitude
     if DEBUG >= 1:
-        log_file.write(f"   Checking minimum visible time ({min_time_up} hours) above minimum altitude ({min_altitude} deg.)")
+        log_file.write(f"   Checking minimum visible time ({min_time_up} hours) above minimum altitude ({min_altitude} deg.)\n")
     if DEBUG >= 2:
         print("      Duration above minimum altitude")
 
-    n = 29
     hours_visible = 0
 
-    for i in range(20, n):
+    for i in range(20+timezone_offset, 29+timezone_offset):
         if i > 23:
             mil_hour = i - 24
         else:
             mil_hour = i
         mil_time = str(mil_hour) + ":00:00"
 
-        query_date = str(year) + "-" + str(month) + "-" + str(day)
+        if i > 23:
+            query_date = str(year) + "-" + str(month) + "-" + str(day+1)
+        else:
+            query_date = str(year) + "-" + str(month) + "-" + str(day)
+
         query_time = str(query_date) + " " + str(mil_time)
 
         # Calculate the altitude of the object at this time
@@ -549,7 +553,7 @@ for object, row in objects_dataframe.iterrows():
             # Use ephem to convert RA,DEC, Date, Time, and Location to Alt-Az
 
             if DEBUG >= 1:
-                log_file.write(f"       Alternate Method for calculating Alt-Az")
+                log_file.write(f"       Alternate Method for calculating Alt-Az\n")
                 #print(f"       Alternate method for calculating Alt-Az")
 
             obj = ephem.FixedBody()
@@ -587,16 +591,16 @@ for object, row in objects_dataframe.iterrows():
         if altitude >= min_altitude:
             hours_visible = hours_visible + 1
             if DEBUG >= 2:
-                log_file.write(f"       Above min ALT {min_altitude}. Added to hours_visible {hours_visible}")
+                log_file.write(f"       Above min ALT {min_altitude} at {time} GMT. Added to hours_visible {hours_visible}\n")
     
     obj_score4 = hours_visible + 1.0
 
     if hours_visible < min_time_up:
         if DEBUG >= 1:
-            log_file.write(f"    Object RA: {obj_RA}, Object DEC: {obj_DEC}, Object ALT: {altitude}, Object AZ: {azimuth}")
-            log_file.write(f"     ELIMINATED: {obj_label} not visible ({hours_visible} hrs) for long enough {min_time_up} hrs")
+            log_file.write(f"    Object RA: {obj_RA}, Object DEC: {obj_DEC}, Object ALT: {altitude}, Object AZ: {azimuth}\n")
+            log_file.write(f"     ELIMINATED: {obj_label} not visible ({hours_visible} hrs) for long enough {min_time_up} hrs\n")
         if DEBUG >= 2:
-            log_file.write(f"       Loop: At {time} {obj_label} is at: Altitude: {altitude:3f} Azimuth: {azimuth:3f} hours_visible: {hours_visible}")
+            log_file.write(f"       Loop: At {time} {obj_label} is at: Altitude: {altitude:3f} Azimuth: {azimuth:3f} hours_visible: {hours_visible}\n")
         continue
 
     # ---------------------------------------------------------------------------------------------------------------------------------
@@ -643,9 +647,9 @@ for object, row in objects_dataframe.iterrows():
     filtered_obj_dataframe = filtered_obj_dataframe.reset_index(drop=True)
 
     if DEBUG >= 1:
-        log_file.write(f"  SCORES: Mag: {obj_score1}, Size: {obj_score2}, Moon angle: {obj_score3}, Moon full: {obj_score5}, Hours: {obj_score4}, TOTAL: {score_sum}")
+        log_file.write(f"  SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.0f}, Hours: {obj_score4}, TOTAL: {score_sum:.5f}\n")
     if DEBUG >= 2:
-        print(f"  SCORES: Mag: {obj_score1}, Size: {obj_score2}, Moon angle: {obj_score3}, Moon full: {obj_score5}, Hours: {obj_score4}, TOTAL: {score_sum}")
+        print(f"  SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.0f}, Hours: {obj_score4}, TOTAL: {score_sum:.3f}")
 
 
     #print(filtered_obj_dataframe)
