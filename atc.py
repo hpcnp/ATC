@@ -36,21 +36,86 @@ DEBUG = 2               # DEBUG 0,1,2,3   0 - no debug output, 1-3 more and more
 # 
 # Preferences
 max_obj_magnitude = 14.0    # minimum brightness
-min_obj_size = 9.0          # min object size (arcmin)
-max_obj_size = 30.0         # max object size (arcmin)
-min_time_up = 2.5       # hours that the object will be above min height
+min_obj_size = 29.0          # min object size (arcmin)
+max_obj_size = 60.0         # max object size (arcmin)
+min_time_up = 3.5       # hours that the object will be above min height
 min_altitude = 30.0     # minimum altitude above horizon (deg)
 max_moon_pct = 100.0    # maximum moon phase.  Set to 100.0 to disable
 min_moon_angle = 25.0   # min angle between object and the moon (deg)
-timezone_offset = 7
+timezone_offset = 7     # local timezone offset to GMT
 preferred_types = ['galaxy', 'emission nebula', 'reflection nebula', 'bright nebula', 'supernova']
 discarded_types = ['star', 'open clus', 'asterism', 'diffuse', 'existant', 'open cluster']
 narrow_types = ['nebula', 'supernova']
+output_RA = 'hms'       # Output RA in hours:minutes:seconds [hms] or decimal degrees [dd]
+output_DEC = 'dms'      # Output DEC in degrees:minutes:seconds [dms] or decimal degrees [dd]
 
 # ======================================================================================================================================
 #
 # Open LOG for appending
 log_file = open(LOG, "a")
+
+# ======================================================================================================================================
+#  Functions 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   Convert decimal degress to hour-minute-second
+#   Format:  HH:MM:SS.SSS
+def decdeg_to_hms(coord_degrees, pretty_print=None, ndp=2):
+    """Convert from decimal degrees to degrees, minutes, seconds."""
+    import math
+
+    total_seconds = (coord_degrees / 360.0) * (24.0 * 3600.0)
+    coord_hours = int(total_seconds / 3600.0)
+
+    rem_seconds = total_seconds - coord_hours * 3600.0
+    coord_minutes = int(rem_seconds / 60.0)
+    coord_seconds = total_seconds - coord_hours * 3600.0 - coord_minutes * 60.0
+    coord_hms = str(coord_hours) + ":" + str(coord_minutes) + ":" + str(coord_seconds)
+
+    if DEBUG >= 2:
+        log_file.write(f"   Convert DecDeg to HMS: Deg: {coord_degrees} whcih is {coord_hours} hours, {coord_minutes} min, and {coord_seconds} sec\n")
+    if DEBUG >= 3:
+        print(f"     Convert DecDeg to HMS: Deg: {coord_degrees} whcih is {coord_hours} hours, {coord_minutes} min, and {coord_seconds} sec\n")
+
+    if pretty_print:
+        if pretty_print=='latitude':
+            hemi = 'N' if d>=0 else 'S'
+        elif pretty_print=='longitude':
+            hemi = 'E' if d>=0 else 'W'
+        else:
+            hemi = '?'
+        return '{d:d}° {coord_minutes:coord_degrees}′ {coord_seconds:.{ndp:coord_degrees}f}″ {hemi:1s}'.format(
+                    coord_degress=abs(coord_degrees), coord_minutes=m, coord_seconds=seconds, hemi=hemi, ndp=ndp)
+    return coord_hours, coord_minutes, coord_seconds, coord_hms
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   Convert decimal degrees to degrees-minutes-seconds
+#   Format:  DD:MM:SS.SSS
+def decdeg_to_dms(coord_degrees, pretty_print=None, ndp=3):
+    """Convert from decimal degrees to degrees, minutes, seconds."""
+
+    coord_minutes, coord_seconds = divmod(abs(coord_degrees)*3600, 60)
+    coord_degrees, coord_minutes = divmod(coord_minutes, 60)
+
+    if coord_degrees < 0:
+        coord_degrees = -coord_degrees
+    coord_degrees, coord_minutes = int(coord_degrees), int(coord_minutes)
+
+    coord_dms = str(coord_degrees) + ":" + str(coord_minutes) + ":" + str(coord_seconds)
+
+    if pretty_print:
+        if pretty_print=='latitude':
+            hemi = 'N' if d>=0 else 'S'
+        elif pretty_print=='longitude':
+            hemi = 'E' if d>=0 else 'W'
+        else:
+            hemi = '?'
+        return '{d:d}° {coord_minutes:coord_degrees}′ {coord_seconds:.{ndp:coord_degrees}f}″ {hemi:1s}'.format(
+                    coord_degress=abs(coord_degrees), coord_minutes=m, coord_seconds=seconds, hemi=hemi, ndp=ndp)
+    return coord_degrees, coord_minutes, coord_seconds, coord_dms
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #
 # Pull in Time info, different formats
@@ -635,6 +700,14 @@ for object, row in objects_dataframe.iterrows():
     obj_notes  = objects_dataframe.loc[object,'notes']
     score_sum = obj_score1 + obj_score2 + obj_score3 + obj_score4 + obj_score5
 
+    if output_RA == 'hms':
+        obj_RA_hours, obj_RA_minutes, obj_RA_seconds, obj_RA_hms = decdeg_to_hms(obj_RA)
+        obj_RA = obj_RA_hms
+
+    if output_DEC == 'dms':
+        obj_DEC_deg, obj_DEC_minutes, obj_DEC_seconds, obj_DEC_dms = decdeg_to_dms(obj_DEC)
+        obj_DEC = obj_DEC_dms
+
     # Create a dictionary with the data for the new row
     new_row = {'label1': obj_label, 'label2': obj_label2, 'constellation': obj_const, 'magnitude': object_magnitude, 'season': obj_season,
                'size': object_size, 'ra': obj_RA, 'dec': obj_DEC, 'type': obj_type, 'notes': obj_notes, 'score1': obj_score1, 'score2': obj_score2,
@@ -647,9 +720,9 @@ for object, row in objects_dataframe.iterrows():
     filtered_obj_dataframe = filtered_obj_dataframe.reset_index(drop=True)
 
     if DEBUG >= 1:
-        log_file.write(f"  SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.0f}, Hours: {obj_score4}, TOTAL: {score_sum:.5f}\n")
+        log_file.write(f"  SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.1f}, Hours: {obj_score4}, TOTAL: {score_sum:.5f}\n")
     if DEBUG >= 2:
-        print(f"  SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.0f}, Hours: {obj_score4}, TOTAL: {score_sum:.3f}")
+        print(f"  SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.1f}, Hours: {obj_score4}, TOTAL: {score_sum:.3f}")
 
 
     #print(filtered_obj_dataframe)
