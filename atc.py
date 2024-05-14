@@ -41,6 +41,7 @@ max_obj_size = 60.0         # max object size (arcmin)
 min_time_up = 3.5       # hours that the object will be above min height
 min_altitude = 30.0     # minimum altitude above horizon (deg)
 max_moon_pct = 100.0    # maximum moon phase.  Set to 100.0 to disable
+max_moon_pct_broad = 25.0    # maximum moon phase for broadband target.  Set to 100.0 to disable
 min_moon_angle = 25.0   # min angle between object and the moon (deg)
 timezone_offset = 7     # local timezone offset to GMT
 preferred_types = ['galaxy', 'emission nebula', 'reflection nebula', 'bright nebula', 'supernova']
@@ -56,6 +57,7 @@ log_file = open(LOG, "a")
 
 # ======================================================================================================================================
 #  Functions 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   Convert decimal degress to hour-minute-second
 #   Format:  HH:MM:SS.SSS
@@ -115,9 +117,29 @@ def decdeg_to_dms(coord_degrees, pretty_print=None, ndp=3):
                     coord_degress=abs(coord_degrees), coord_minutes=m, coord_seconds=seconds, hemi=hemi, ndp=ndp)
     return coord_degrees, coord_minutes, coord_seconds, coord_dms
 
+def decdeg_to_rad(degrees):
+    import math
+    radians = degrees * math.pi / 180.0
+
+    return radians
+
+def rad_to_decdeg(coord_radians):
+    import math
+    coord_degrees = coord_radians * 180.0 / math.pi 
+
+    return coord_degrees
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#++++++++++++
+#   TO DO
+#++++++++++++
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   Convert degress-minutes-seconds to decimal degrees
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   Convert hour-minute-second to decimal degrees
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#
+
 # Pull in Time info, different formats
 from datetime import datetime
 today_date = datetime.now()
@@ -347,6 +369,10 @@ if DEBUG >= 3:
 #  6- QE (%), 
 #  7- Cooled (YES,NO)
 #  8- Imaging (YES,NO)
+#  9- Full well (keV)
+# 10- Unity Gain
+
+
 
 print("\n")
 print("  ..Reading objects DB")
@@ -409,12 +435,11 @@ for camera, row in cameras_dataframe.iterrows():
         if DEBUG >=2:
             print(f"     Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']},  arcsec per pixel: {arcsec_per_pixel:.3f}")
 
-        #tmp_data = {cameras_dataframe.loc[camera,0]: [scopes_dataframe.loc[scope,0], field_of_view, arcsec_per_pixel]}
 
  # =========================================================================================================================================
  # FILTER - go throough the DB of objects and eliminate those that are not possible or don't satisfy criteria
  #
- #    Filters: 
+ #    Object Filters: 
  #       1) higher than min magnitude
  #       2) higher than max size
  #       3) lower than min size
@@ -451,6 +476,12 @@ print("  ...Looping through object DB and eliminating those that violate constra
 for object, row in objects_dataframe.iterrows():
     # ---------------------------------------------------------------------------------------------------------------------------------
     #   Apparent magnitude filter
+
+    if DEBUG >= 2:
+        log_file.write(f"   Filter: Checking minimum apparent brightness (magnitude < {max_obj_magnitude})\n")
+    if DEBUG >= 3:
+        print(f"      Filter: Checking minimum apparent magnitude < {max_obj_magnitude}\n")
+
     object_magnitude = objects_dataframe.loc[object,'magnitude']
     obj_label = objects_dataframe.loc[object,'label1']
 
@@ -466,6 +497,12 @@ for object, row in objects_dataframe.iterrows():
 
     # ---------------------------------------------------------------------------------------------------------------------------------
     #   Size filter - operating in arcminutes
+
+    if DEBUG >= 2:
+        log_file.write(f"   Filter: Checking size of object between minimum ({min_obj_size}) and maximum {max_obj_size} arcmin.\n")
+    if DEBUG >= 3:
+        print(f"      Filter: Checking size of object between minimum {min_obj_size} and maximum {max_obj_size} arcmin.\n")
+
     object_size = objects_dataframe.loc[object,'size']
 
     obj_score2 = ( float(object_size) / max_obj_size ) * 10.0
@@ -485,6 +522,11 @@ for object, row in objects_dataframe.iterrows():
 
     # ---------------------------------------------------------------------------------------------------------------------------------
     #   max moon phase filter
+    if DEBUG >= 2:
+        log_file.write(f"   Filter: Checking maximum moon phase ({max_moon_pct}%).\n")
+    if DEBUG >= 3:
+        print(f"      Filter: Checking moon phase ({max_moon_pct}).\n")
+
     obj_score5 = 7.5 * math.cos((math.pi / 2.0) * (moon_pct / 100.0))
 
     if moon_pct > 40.0:
@@ -510,6 +552,11 @@ for object, row in objects_dataframe.iterrows():
     # ---------------------------------------------------------------------------------------------------------------------------------
     #  min moon angle to the object filter
 
+    if DEBUG >= 2:
+        log_file.write(f"   Filter: Checking Minimum moon angle({min_moon_angle} deg).\n")
+    if DEBUG >= 3:
+        print(f"      Filter: Checking Minimum moon angle ({min_moon_angle} deg)\n")
+
     observer = ephem.Observer()
     observer.lat = str(latitude)
     observer.lon = str(longitude)
@@ -529,7 +576,7 @@ for object, row in objects_dataframe.iterrows():
         if DEBUG >= 1:
             log_file.write(f"   From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA:.3f} deg., DEC: {obj_DEC:.3f} deg.\n")
         if DEBUG >= 3:
-            print(f"        From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA:.3f} deg., DEC: {obj_DEC:.3f} deg.")
+            print(f"    From AstroPy.SkyCoord Object: {obj_label}, RA: {obj_RA:.3f} deg., DEC: {obj_DEC:.3f} deg.")
 
     except:
         obj_label = objects_dataframe.loc[object,'label1']
@@ -539,7 +586,7 @@ for object, row in objects_dataframe.iterrows():
         if DEBUG >= 1:
             log_file.write(f"   From DB Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC:.4f} deg.\n")
         if DEBUG >= 2:
-            print(f"        From DB Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC:.4f} deg.")
+            print(f"    From DB Object: {obj_label}, RA: {obj_RA} deg., DEC: {obj_DEC:.4f} deg.")
 
     #
     # Python math.<trig_function> uses radians instead of degrees - so convert the quantities to radians
@@ -570,14 +617,34 @@ for object, row in objects_dataframe.iterrows():
 
     # ---------------------------------------------------------------------------------------------------------------------------------
     #   Object type filter
+
+    if DEBUG >= 2:
+        log_file.write(f"   Filter: Checking that the type of object is of interest\n")
+    if DEBUG >= 3:
+        print("      Filter: Checking that the type of object is of interest")
+
+    # ID a narrowband vs. broadband target (e.g. is it a nebula or not)
+    obj_type = objects_dataframe.loc[object,'type']
+    if obj_type.find('Nebula') != -1:
+        obj_type_filter = 'narrowband'
+    else:
+        obj_type_filter = 'broadband'
+
+    # Reject broadband targets when the moon is too full
+    if obj_type_filter == 'broadband' and moon_pct >= max_moon_pct_broad:
+        if DEBUG >= 1:
+            log_file.write(f"    ELIMINATED {obj_label} because it is a broadband target and the moon is too full {moon_pct}%\n")
+        if DEBUG >= 2:
+            print(f"      ELIMINATED {obj_label} because it is a broadband target and the moon is too full {moon_pct}%\n")
+        continue 
+
     skip_obj = "NO"
     for dtype in discarded_types:
-        obj_type = objects_dataframe.loc[object,'type']
         if (dtype.lower() in obj_type.lower()):
             if DEBUG >= 1:
                 log_file.write(f"    Discarded {obj_label} because it is a discard type\n")
             if DEBUG >= 2:
-                print(f"        Discarded {obj_label} with type: {obj_type} because this is a discarded type {dtype}")
+                print(f"      ELIMINATED {obj_label} with type: {obj_type} because this is a discarded type {dtype}")
             skip_obj = "YES"
             break
     if (skip_obj == "YES"):
@@ -585,10 +652,11 @@ for object, row in objects_dataframe.iterrows():
 
     # ---------------------------------------------------------------------------------------------------------------------------------
     # Duration above minimum altitude
-    if DEBUG >= 1:
-        log_file.write(f"   Checking minimum visible time ({min_time_up} hours) above minimum altitude ({min_altitude} deg.)\n")
+
     if DEBUG >= 2:
-        print("      Duration above minimum altitude")
+        log_file.write(f"   Filter: Checking minimum visible time ({min_time_up} hours) above minimum altitude ({min_altitude} deg.)\n")
+    if DEBUG >= 3:
+        print(f"      Filter: Duration above minimum ({min_time_up}) altitude")
 
     hours_visible = 0
 
@@ -647,6 +715,11 @@ for object, row in objects_dataframe.iterrows():
             tmp_az = str(obj.az)
             az_deg, az_min, az_sec = tmp_az.split(':')
 
+            #
+            # Not needed (yet) but calcualte local sidereal time and hour angle
+            # local_sidereal_time = 
+            # hour_angle =
+
             if float(az_deg) >= 0.0:
                 altitude = float(az_deg) + float(az_min)/60.0 + float(az_sec)/3600.0
             else:
@@ -700,6 +773,10 @@ for object, row in objects_dataframe.iterrows():
     obj_notes  = objects_dataframe.loc[object,'notes']
     score_sum = obj_score1 + obj_score2 + obj_score3 + obj_score4 + obj_score5
 
+    # =======
+    # Calculate the exposure time for signal to noise ratio based on bortle class and object brightness
+    # =====
+
     if output_RA == 'hms':
         obj_RA_hours, obj_RA_minutes, obj_RA_seconds, obj_RA_hms = decdeg_to_hms(obj_RA)
         obj_RA = obj_RA_hms
@@ -720,26 +797,16 @@ for object, row in objects_dataframe.iterrows():
     filtered_obj_dataframe = filtered_obj_dataframe.reset_index(drop=True)
 
     if DEBUG >= 1:
-        log_file.write(f"  SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.1f}, Hours: {obj_score4}, TOTAL: {score_sum:.5f}\n")
+        log_file.write(f"   SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.1f}, Hours: {obj_score4}, TOTAL: {score_sum:.5f}\n")
     if DEBUG >= 2:
-        print(f"  SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.1f}, Hours: {obj_score4}, TOTAL: {score_sum:.3f}")
-
-
-    #print(filtered_obj_dataframe)
+        print(f"   SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.1f}, Hours: {obj_score4}, TOTAL: {score_sum:.3f}")
 
 
 print(f"\nTOTAL Objects passing filter: {objects_passed}\n")
-#print("Label    Type        Mag Score   Size Scr    Moon Angle  Visible Moon PCT    TOTAL Score") 
 
 # Sort the filtered dataframe by total score descending
 sorted_filtered_df = filtered_obj_dataframe.sort_values(by=['totalscore'], ascending=False)
 
-for object, row in sorted_filtered_df.iterrows():    
-    # Print the next line
-    obj_type = filtered_obj_dataframe.loc[object,'type']
-    obj_label = filtered_obj_dataframe.loc[object,'label1']
-    score = filtered_obj_dataframe.loc[object,'totalscore']
-
-    #print(f"{obj_label}     {obj_type}     {obj_score1:.2f}    {obj_score2:.2f}   {obj_score3:.2f}  {obj_score4:.2f} {obj_score5:.2f}   {score:.2f}")
-
+#
+# Print up to the first 15 lines of the sorted table
 print(tabulate((sorted_filtered_df[['label1','constellation','magnitude','size','ra','dec','type','score4','totalscore']].head(15)), headers='keys', tablefmt='psql', showindex=False))

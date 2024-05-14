@@ -1,6 +1,6 @@
-label,vert_pix,horz_pix,pix_size,type,QE,cooled,imaging,full_well
-1600mm,3520,4656,3.8,Mono,60,YES,YES
-2600mc,4176,6248,3.76,OSC,81,YES,YES
-120mm,960,1280,3.75,Mono,80,NO,NO
-183mc,3672,5496,2.4,OSC,84,NO,NO
-585mc,2160,3840,2.9,OSC,91,NO,NO
+label,vert_pix,horz_pix,pix_size,type,QE,cooled,imaging,full_well,unity_gain
+1600mm,3520,4656,3.8,Mono,60,YES,YES,20,139
+2600mc,4176,6248,3.76,OSC,81,YES,YES,50,100
+120mm,960,1280,3.75,Mono,80,NO,NO,4,100
+183mc,3672,5496,2.4,OSC,84,NO,NO,15,120
+585mc,2160,3840,2.9,OSC,91,NO,NO,40,210
