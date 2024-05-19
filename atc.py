@@ -46,9 +46,11 @@ min_moon_angle = 25.0   # min angle between object and the moon (deg)
 timezone_offset = 7     # local timezone offset to GMT
 preferred_types = ['galaxy', 'emission nebula', 'reflection nebula', 'bright nebula', 'supernova']
 discarded_types = ['star', 'open clus', 'asterism', 'diffuse', 'existant', 'open cluster']
+lp_constants = ['1','3','25','40','100'] # Filters: none, LRGB/UVIR, 12nm, 7nm, 3nm
 narrow_types = ['nebula', 'supernova']
 output_RA = 'hms'       # Output RA in hours:minutes:seconds [hms] or decimal degrees [dd]
 output_DEC = 'dms'      # Output DEC in degrees:minutes:seconds [dms] or decimal degrees [dd]
+output_RECS = 'YES'     # Recommend which scope, reducer, filter, exposure range to use per target
 
 # ======================================================================================================================================
 #
@@ -401,6 +403,30 @@ if DEBUG >= 3:
 #  8- Type, 
 #  9- Notes
 
+print("\n")
+print("  ..Reading Light Pollution Table")
+light_pollution_df = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/LIGHT_POLLUTION.dat')
+print("\n")
+
+if DEBUG >= 3:
+    # print out the stats about the dataframe
+    print("\n")
+    log_file.write("Light Pollution Table\n")
+    light_pollution_df.info()
+    log_file.write("\n")
+    print("\n")
+
+# 1- F-stop
+# 2- Bortle: 9
+# 3- Bortle: 8
+# 4- Bortle: 7
+# 5- Bortle: 6
+# 6- Bortle: 5
+# 7- Bortle: 4
+# 8- Bortle: 3
+# 9- Bortle: 2
+# 10- Bortle: 3
+
 # =======================================================================================================================================================
 # Calculate Field of View for each scope and camera combination
 # Loop through cameras
@@ -414,12 +440,14 @@ for camera, row in cameras_dataframe.iterrows():
         continue
     # Loop through scopes
     for scope, row in scopes_dataframe.iterrows():
+
         # FOV (in arc-min) = 3436 * D / L
         # D is the sensor dimension in mm
         # L is the FL in mm
         vert_sensor_size = 0.001 * cameras_dataframe.loc[camera,'pix_size'] * cameras_dataframe.loc[camera,'vert_pix']
         horz_sensor_size = 0.001 * cameras_dataframe.loc[camera,'pix_size'] * cameras_dataframe.loc[camera,'horz_pix']
         field_of_view =  (3436.0 * math.sqrt(vert_sensor_size**2 + horz_sensor_size**2)) / scopes_dataframe.loc[scope,'focal_length_mm']
+
         if DEBUG >=1:
             log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']}, field of view (arcmin): {field_of_view:.3f}\n")
         if DEBUG >=2:
@@ -429,11 +457,29 @@ for camera, row in cameras_dataframe.iterrows():
         # PS is the pixel size (microns)
         # FL is the focal length (mm)
         arcsec_per_pixel = (206.265 * cameras_dataframe.loc[camera,'pix_size']) / scopes_dataframe.loc[scope,'focal_length_mm']
+
         if DEBUG >= 1:
             log_file.write(f"   Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']},     arcsec per pixel: {arcsec_per_pixel:.3f}\n")
             log_file.write("\n")
         if DEBUG >=2:
             print(f"     Camera: {cameras_dataframe.loc[camera,'label']},  Scope: {scopes_dataframe.loc[scope,'label']},  arcsec per pixel: {arcsec_per_pixel:.3f}")
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # REVISIT
+        # Calculations for exposure based on bortle class, scope, and camera
+        #if scopes_dataframe.loc[scope,'reducer_on_scope'] == 'YES':
+        #    f_stop = (scopes_dataframe.loc[scope,'reducer_factor'] * scopes_dataframe.loc[scope,'focal_length_mm']) / scopes_dataframe.loc[scope,'aperture_mm']
+        #else:
+        #    f_stop = (scopes_dataframe.loc[scope,'focal_length_mm']) / scopes_dataframe.loc[scope,'aperture_mm']
+
+        #for camera, row in cameras_dataframe.iterrows():
+        #    if camaras_dataframe.loc[camera,'imaging'] == 'NO':
+        #        continue
+        #    lp_mod_param = 1.0 + (cameras_dataframe.loc[camera,'QE'] - 0.5) / ( )
+
+        #min_exposure = (10.0 * cameras_dataframe.loc[camera,'read_noise_l']**2)
+        #max_exposure = (10.0 * cameras_dataframe.loc[camera,'read_noise_h']**2)
+
 
 
  # =========================================================================================================================================
@@ -766,16 +812,16 @@ for object, row in objects_dataframe.iterrows():
     #  12- Score3:  10x the cosine of the angle to the moon (so 90 deg. is a "10")
     #  13- Score4:  Hours visible tonight + 1 
     #  14- Score5:  Moon percent full > 40% preference to narrowband targets, otherwise no preference
+    #  15- Reccommended scope
+    #  16- Recommended reducer 
+    #  17- Recommended camera
+    #  18- Recommended filter
 
     obj_label2 = objects_dataframe.loc[object,'label2']
     obj_const  = objects_dataframe.loc[object,'constellation']
     obj_season = objects_dataframe.loc[object,'season']
     obj_notes  = objects_dataframe.loc[object,'notes']
     score_sum = obj_score1 + obj_score2 + obj_score3 + obj_score4 + obj_score5
-
-    # =======
-    # Calculate the exposure time for signal to noise ratio based on bortle class and object brightness
-    # =====
 
     if output_RA == 'hms':
         obj_RA_hours, obj_RA_minutes, obj_RA_seconds, obj_RA_hms = decdeg_to_hms(obj_RA)
