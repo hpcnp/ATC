@@ -7,6 +7,7 @@ import re
 from re import split
 import numpy as np
 import scipy
+from scipy.interpolate import interp2d
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz, ICRS, get_sun, get_moon
 from astropy.time import Time
 import astropy.units as u
@@ -44,6 +45,8 @@ max_moon_pct = 100.0    # maximum moon phase.  Set to 100.0 to disable
 max_moon_pct_broad = 25.0    # maximum moon phase for broadband target.  Set to 100.0 to disable
 min_moon_angle = 25.0   # min angle between object and the moon (deg)
 timezone_offset = 7     # local timezone offset to GMT
+FOV_ideal_frac = 0.65   # the ideal fraction of the field of view (used for recommendations)
+obj_count = 15          # number of objects in the output table
 preferred_types = ['galaxy', 'emission nebula', 'reflection nebula', 'bright nebula', 'supernova']
 discarded_types = ['star', 'open clus', 'asterism', 'diffuse', 'existant', 'open cluster']
 lp_constants = ['1','3','25','40','100'] # Filters: none, LRGB/UVIR, 12nm, 7nm, 3nm
@@ -373,8 +376,8 @@ if DEBUG >= 3:
 #  8- Imaging (YES,NO)
 #  9- Full well (keV)
 # 10- Unity Gain
-
-
+# 11- Read noise low
+# 12- Read noise high
 
 print("\n")
 print("  ..Reading objects DB")
@@ -389,7 +392,6 @@ if DEBUG >= 3:
     objects_dataframe.info()
     log_file.write("\n")
     print("\n")
-
 
 # DB Fields
 #  0- Label 1, 
@@ -517,8 +519,23 @@ filtered_obj_dataframe = pd.DataFrame({
     'totalscore': []
 })
 
+#
+# Create a DataFrame for storing recommendations for scope, camera, reducer, filter, exposure
+reccommendations_df = pd.DataFrame({
+    'label1': [],
+    'scope': [],
+    'camera': [],
+    'reducer': [],
+    'field_of_view': [],
+    'fov_frac': [],
+    'fov_err': [],
+    'filter': [],
+    'min_exp': [],
+    'max_exp': []
+})
+
 print("  ...Looping through object DB and eliminating those that violate constraints")
- 
+
 for object, row in objects_dataframe.iterrows():
     # ---------------------------------------------------------------------------------------------------------------------------------
     #   Apparent magnitude filter
@@ -847,6 +864,95 @@ for object, row in objects_dataframe.iterrows():
     if DEBUG >= 2:
         print(f"   SCORES: Mag: {obj_score1:.2f}, Size: {obj_score2:.1f}, Moon angle: {obj_score3:.2f}, Moon full: {obj_score5:.1f}, Hours: {obj_score4}, TOTAL: {score_sum:.3f}")
 
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    # Reccommend Scope, Camera, Filter, Reducer, Exposure
+    #    create a data frame with the object label and the above
+    #
+
+    if output_RECS == 'YES':
+        # Loop through camera and scope to check the object size against the field of view
+        for camera, row in cameras_dataframe.iterrows():
+            if str(cameras_dataframe.loc[camera,'imaging']) == "NO":
+                continue
+
+            if DEBUG >= 2:
+                log_file.write(f"   Recommendation loop - camera: {cameras_dataframe.loc[camera,'label']} and scope:{scopes_dataframe.loc[scope, 'label']}\n")
+            if DEBUG >= 3:
+                print(f"     Recommendation loop - camera: {cameras_dataframe.loc[camera,'label']} and scope:{scopes_dataframe.loc[scope, 'label']}\n")
+
+            # Loop through scopes
+            for scope, row in scopes_dataframe.iterrows():
+                # FOV (in arc-min) = 3436 * D / L
+                # D is the sensor dimension in mm
+                # L is the FL in mm
+                vert_sensor_size = 0.001 * cameras_dataframe.loc[camera,'pix_size'] * cameras_dataframe.loc[camera,'vert_pix']
+                horz_sensor_size = 0.001 * cameras_dataframe.loc[camera,'pix_size'] * cameras_dataframe.loc[camera,'horz_pix']
+                field_of_view =  (3436.0 * math.sqrt(vert_sensor_size**2 + horz_sensor_size**2)) / scopes_dataframe.loc[scope,'focal_length_mm']
+                scope_f_stop = scopes_dataframe.loc[scope,'focal_length_mm'] / scopes_dataframe.loc[scope, 'aperture_mm']
+                FOV_frac = float(object_size) / float(field_of_view)
+                ideal_fov_err = abs(FOV_frac - FOV_ideal_frac)
+
+                print(f"DEBUG: Field_of_view = {field_of_view}")
+                print(f"DEBUG: Field_of_view fraction = {FOV_frac}")
+                print(f"DEBUG: Ideal Field_of_view error = {ideal_fov_err}")
+
+                # START exposure range
+                if obj_type_filter == 'broadband':
+                    lp_filter_factor = 3.0
+                else:
+                    lp_filter_factor = 100.0
+
+                lp_multiplier = (1.0 + (cameras_dataframe.loc[camera, 'QE'] / 100.0 - 0.5)) / lp_filter_factor
+
+                x = [4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+                y = [9, 8, 7, 6, 5, 4, 3, 2, 1]
+
+                # bortle  9     8     7     6    5    4    3     2    1   
+                z = [[175.0, 62.0, 22.0, 10.8, 5.3, 2.5, 1.2, 0.98, 0.8],  # f4.0
+                     [112.0, 40.0, 14.0, 7.2, 3.7, 1.7, 0.81, 0.64, 0.51], # f5.0
+                     [78.0,  27.0,  9.6, 5.0, 2.6, 1.2, 0.56, 0.45, 0.36], # f6.0
+                     [57.0,  20.0,  7.1, 3.7, 1.9, 0.9, 0.41, 0.33, 0.26], # f7.0
+                     [47.0,  17.0,  5.9, 3.0, 1.6, 0.7, 0.34, 0.27, 0.22], # f8.0
+                     [38.0,  13.0,  4.6, 2.4, 1.2, 0.6, 0.26, 0.21, 0.17], # f9.0
+                     [28.0,  10.0,  3.4, 1.7, 0.85,0.4, 0.19, 0.16, 0.13]] # f10.0
+
+                z = np.array(z).T
+
+                f = interp2d(x, y, z)
+
+                                # fstop, bortle
+                interp_lp_value = f(x = scope_f_stop, y = bortle_class) 
+                print(f"DEBUG: Interpolated Value = {interp_lp_value}")
+
+                modified_lp_value = interp_lp_value * lp_multiplier
+                print(f"DEBUG: Modified Interpolated Value = {modified_lp_value}")
+                
+                min_exposure_time = float((10.0 * (cameras_dataframe.loc[camera, 'read_noise_l'])**2) / modified_lp_value)
+                max_exposure_time = float((10.0 * (cameras_dataframe.loc[camera, 'read_noise_h'])**2) / modified_lp_value)
+                print(f"DEBUG: Fstop: {scope_f_stop}, bortle: {bortle_class}")
+                print(f"DEBUG: min_exposure_time = {min_exposure_time} sec.")
+                print(f"DEBUG: max_exposure_time = {max_exposure_time} sec.\n")
+                # stop here
+                # END exposure range
+
+                for jj in range(1, 2):
+                    if jj == 1:
+                        new_row_rec = {'label1': obj_label, 'scope': scopes_dataframe.loc[scope, 'label'], 'camera': cameras_dataframe.loc[camera, 'label'], 
+                                       'reducer': 'NO', 'field_of_view': field_of_view, 'fov_frac': FOV_frac, 'fov_err': ideal_fov_err, 'filter': obj_type_filter,
+                                       'min_exp': min_exposure_time, 'max_exp': max_exposure_time}
+                    else:
+                        field_of_view_ff =  field_of_view / scopes_dataframe.loc[scope, 'reducer_factor']
+                        FOV_frac_ff = object_size / field_of_view_ff 
+                        ideal_fov_err = abs(FOV_frac_ff - FOV_ideal_frac)
+                        new_row_rec = {'label1': obj_label, 'scope': scopes_dataframe.loc[scope, 'label'], 'camera': cameras_dataframe.loc[camera, 'label'], 
+                                       'reducer': 'YES', 'field_of_view': field_of_view_ff, 'fov_frac': FOV_frac_ff, 'fov_err': ideal_fov_err, 'filter': obj_type_filter,
+                                       'min_exp': min_exposure_time, 'max_exp': max_exposure_time} 
+
+                    reccommendations_df.loc[len(reccommendations_df)] = new_row_rec
+                    reccommendations_df = reccommendations_df.reset_index(drop=True)
+
+        # Sort the filtered dataframe by total score descending
+        sorted_recs_df = reccommendations_df.sort_values(by=['fov_err'], ascending=True)
 
 print(f"\nTOTAL Objects passing filter: {objects_passed}\n")
 
@@ -854,5 +960,9 @@ print(f"\nTOTAL Objects passing filter: {objects_passed}\n")
 sorted_filtered_df = filtered_obj_dataframe.sort_values(by=['totalscore'], ascending=False)
 
 #
-# Print up to the first 15 lines of the sorted table
-print(tabulate((sorted_filtered_df[['label1','constellation','magnitude','size','ra','dec','type','score4','totalscore']].head(15)), headers='keys', tablefmt='psql', showindex=False))
+# Print up to the first <obj_count> lines of the sorted table
+print(tabulate((sorted_filtered_df[['label1','constellation','magnitude','size','ra','dec','type','score4','totalscore']].head(obj_count)), headers='keys', tablefmt='psql', showindex=False))
+
+if output_RECS == 'YES':
+    print("\nReccommended Equipment per Object:")
+    print(tabulate((sorted_recs_df[['label1','scope','camera','reducer','field_of_view','fov_frac','fov_err','filter','min_exp','max_exp']].head(10)), headers='keys', tablefmt='psql', showindex=False))
