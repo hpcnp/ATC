@@ -45,7 +45,7 @@ max_moon_pct = 100.0    # maximum moon phase.  Set to 100.0 to disable
 max_moon_pct_broad = 25.0    # maximum moon phase for broadband target.  Set to 100.0 to disable
 min_moon_angle = 25.0   # min angle between object and the moon (deg)
 timezone_offset = 7     # local timezone offset to GMT
-FOV_ideal_frac = 0.65   # the ideal fraction of the field of view (used for recommendations)
+FOV_ideal_frac = 0.75   # the ideal fraction of the field of view (used for recommendations)
 obj_count = 15          # number of objects in the output table
 preferred_types = ['galaxy', 'emission nebula', 'reflection nebula', 'bright nebula', 'supernova']
 discarded_types = ['star', 'open clus', 'asterism', 'diffuse', 'existant', 'open cluster']
@@ -523,9 +523,11 @@ filtered_obj_dataframe = pd.DataFrame({
 # Create a DataFrame for storing recommendations for scope, camera, reducer, filter, exposure
 reccommendations_df = pd.DataFrame({
     'label1': [],
+    'total_score': [],
     'scope': [],
     'camera': [],
     'reducer': [],
+    'obj_size': [],
     'field_of_view': [],
     'fov_frac': [],
     'fov_err': [],
@@ -890,11 +892,11 @@ for object, row in objects_dataframe.iterrows():
                 field_of_view =  (3436.0 * math.sqrt(vert_sensor_size**2 + horz_sensor_size**2)) / scopes_dataframe.loc[scope,'focal_length_mm']
                 scope_f_stop = scopes_dataframe.loc[scope,'focal_length_mm'] / scopes_dataframe.loc[scope, 'aperture_mm']
                 FOV_frac = float(object_size) / float(field_of_view)
-                ideal_fov_err = abs(FOV_frac - FOV_ideal_frac)
+                ideal_fov_err1 = abs(FOV_frac - FOV_ideal_frac)
 
                 print(f"DEBUG: Field_of_view = {field_of_view}")
                 print(f"DEBUG: Field_of_view fraction = {FOV_frac}")
-                print(f"DEBUG: Ideal Field_of_view error = {ideal_fov_err}")
+                print(f"DEBUG: Ideal Field_of_view error 1 = {ideal_fov_err1}")
 
                 # START exposure range
                 if obj_type_filter == 'broadband':
@@ -922,34 +924,52 @@ for object, row in objects_dataframe.iterrows():
 
                                 # fstop, bortle
                 interp_lp_value = f(x = scope_f_stop, y = bortle_class) 
-                print(f"DEBUG: Interpolated Value = {interp_lp_value}")
+                #print(f"DEBUG: Interpolated Value = {interp_lp_value}")
 
                 modified_lp_value = interp_lp_value * lp_multiplier
-                print(f"DEBUG: Modified Interpolated Value = {modified_lp_value}")
+                #print(f"DEBUG: Modified Interpolated Value = {modified_lp_value}")
                 
                 min_exposure_time = float((10.0 * (cameras_dataframe.loc[camera, 'read_noise_l'])**2) / modified_lp_value)
                 max_exposure_time = float((10.0 * (cameras_dataframe.loc[camera, 'read_noise_h'])**2) / modified_lp_value)
-                print(f"DEBUG: Fstop: {scope_f_stop}, bortle: {bortle_class}")
-                print(f"DEBUG: min_exposure_time = {min_exposure_time} sec.")
-                print(f"DEBUG: max_exposure_time = {max_exposure_time} sec.\n")
+                #print(f"DEBUG: Fstop: {scope_f_stop}, bortle: {bortle_class}")
+                #print(f"DEBUG: min_exposure_time = {min_exposure_time} sec.")
+                #print(f"DEBUG: max_exposure_time = {max_exposure_time} sec.\n")
                 # stop here
                 # END exposure range
 
-                for jj in range(1, 2):
+                for jj in range(1, 3):
                     if jj == 1:
-                        new_row_rec = {'label1': obj_label, 'scope': scopes_dataframe.loc[scope, 'label'], 'camera': cameras_dataframe.loc[camera, 'label'], 
-                                       'reducer': 'NO', 'field_of_view': field_of_view, 'fov_frac': FOV_frac, 'fov_err': ideal_fov_err, 'filter': obj_type_filter,
+                        print(f"JJ = {jj}  Reducer: NO" )
+                        new_row_rec = {'label1': obj_label, 'total_score': score_sum, 'scope': scopes_dataframe.loc[scope, 'label'], 'camera': cameras_dataframe.loc[camera, 'label'], 
+                                       'reducer': 'NO', 'field_of_view': field_of_view, 'fov_frac': FOV_frac, 'fov_err': ideal_fov_err1, 'filter': obj_type_filter,
                                        'min_exp': min_exposure_time, 'max_exp': max_exposure_time}
                     else:
+                        print(f"JJ = {jj}  Reducer: YES")
                         field_of_view_ff =  field_of_view / scopes_dataframe.loc[scope, 'reducer_factor']
-                        FOV_frac_ff = object_size / field_of_view_ff 
-                        ideal_fov_err = abs(FOV_frac_ff - FOV_ideal_frac)
-                        new_row_rec = {'label1': obj_label, 'scope': scopes_dataframe.loc[scope, 'label'], 'camera': cameras_dataframe.loc[camera, 'label'], 
-                                       'reducer': 'YES', 'field_of_view': field_of_view_ff, 'fov_frac': FOV_frac_ff, 'fov_err': ideal_fov_err, 'filter': obj_type_filter,
+                        FOV_frac_ff = float(object_size) / float(field_of_view_ff)
+                        ideal_fov_err2 = abs(FOV_frac_ff - FOV_ideal_frac)
+                        new_row_rec = {'label1': obj_label, 'total_score': score_sum, 'scope': scopes_dataframe.loc[scope, 'label'], 'camera': cameras_dataframe.loc[camera, 'label'], 
+                                       'reducer': 'YES', 'field_of_view': field_of_view_ff, 'fov_frac': FOV_frac_ff, 'fov_err': ideal_fov_err2, 'filter': obj_type_filter,
                                        'min_exp': min_exposure_time, 'max_exp': max_exposure_time} 
 
-                    reccommendations_df.loc[len(reccommendations_df)] = new_row_rec
-                    reccommendations_df = reccommendations_df.reset_index(drop=True)
+                    if jj == 2:
+                        if ideal_fov_err1 <= ideal_fov_err2:
+                            new_row_rec = {'label1': obj_label, 'total_score': score_sum, 'scope': scopes_dataframe.loc[scope, 'label'], 'camera': cameras_dataframe.loc[camera, 'label'], 
+                                       'reducer': 'NO', 'obj_size': object_size, 'field_of_view': field_of_view, 'fov_frac': FOV_frac, 'fov_err': ideal_fov_err1, 'filter': obj_type_filter,
+                                       'min_exp': min_exposure_time, 'max_exp': max_exposure_time}
+                        else:
+                            interp_lp_value = f(x = (scope_f_stop * scopes_dataframe.loc[scope, 'reducer_factor']), y = bortle_class) 
+                            modified_lp_value = interp_lp_value * lp_multiplier
+                
+                            min_exposure_time = float((10.0 * (cameras_dataframe.loc[camera, 'read_noise_l'])**2) / modified_lp_value)
+                            max_exposure_time = float((10.0 * (cameras_dataframe.loc[camera, 'read_noise_h'])**2) / modified_lp_value)
+
+                            new_row_rec = {'label1': obj_label, 'total_score': score_sum, 'scope': scopes_dataframe.loc[scope, 'label'], 'camera': cameras_dataframe.loc[camera, 'label'], 
+                                       'reducer': 'YES', 'obj_size': object_size, 'field_of_view': field_of_view_ff, 'fov_frac': FOV_frac_ff, 'fov_err': ideal_fov_err2, 'filter': obj_type_filter,
+                                       'min_exp': min_exposure_time, 'max_exp': max_exposure_time}
+
+                        reccommendations_df.loc[len(reccommendations_df)] = new_row_rec
+                        reccommendations_df = reccommendations_df.reset_index(drop=True)
 
         # Sort the filtered dataframe by total score descending
         sorted_recs_df = reccommendations_df.sort_values(by=['fov_err'], ascending=True)
@@ -965,4 +985,4 @@ print(tabulate((sorted_filtered_df[['label1','constellation','magnitude','size',
 
 if output_RECS == 'YES':
     print("\nReccommended Equipment per Object:")
-    print(tabulate((sorted_recs_df[['label1','scope','camera','reducer','field_of_view','fov_frac','fov_err','filter','min_exp','max_exp']].head(10)), headers='keys', tablefmt='psql', showindex=False))
+    print(tabulate((sorted_recs_df[['label1','total_score','scope','camera','reducer','obj_size','field_of_view','fov_frac','fov_err','filter','min_exp','max_exp']].head(obj_count)), headers='keys', tablefmt='psql', showindex=False))
