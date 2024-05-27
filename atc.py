@@ -33,12 +33,12 @@ scopes_file = "/Users/christopherporter/Desktop/ASTRO/ATC/scopes.dat"
 cameras_file = "/Users/christopherporter/Desktop/ASTRO/ATC/cameras.dat"
 astro_db_file = "/Users/christopherporter/Desktop/ASTRO/ATC/astro_db3.dat"
 LOG = "/Users/christopherporter/Desktop/ASTRO/ATC/atc.log"
-DEBUG = 2               # DEBUG 0,1,2,3   0 - no debug output, 1-3 more and more verbose output
+DEBUG = 0               # DEBUG 0,1,2,3   0 - no debug output, 1-3 more and more verbose output
 # 
 # Preferences
 max_obj_magnitude = 14.0    # minimum brightness
-min_obj_size = 29.0          # min object size (arcmin)
-max_obj_size = 60.0         # max object size (arcmin)
+min_obj_size = 90.0          # min object size (arcmin)
+max_obj_size = 220.0         # max object size (arcmin)
 min_time_up = 3.5       # hours that the object will be above min height
 min_altitude = 30.0     # minimum altitude above horizon (deg)
 max_moon_pct = 100.0    # maximum moon phase.  Set to 100.0 to disable
@@ -311,7 +311,7 @@ def get_astronomical_night():
     # Format the time of astronomical night as a string in the format "HH:MM"
     night_time_str = night_time.strftime("%H:%M")
 
-    print(f"      The start time of astronomical night tonight is {night_time_str}")
+    print(f"     The start time of astronomical night tonight is {night_time_str}")
     if DEBUG >= 1:
         log_file.write(f"     The start time of astronomical night tonight is {night_time_str}\n")
 
@@ -325,7 +325,7 @@ def get_astronomical_night():
     #print(f"\nTotal night duration is: {night_duration}")
     #print(f"Twilight duration is: {twilight_duration}")
 
-    print(f"    The time of astronomical night ends tomrrow is {dawn_time_str}")
+    print(f"     The time of astronomical night ends tomrrow is {dawn_time_str}")
     if DEBUG >= 1:
         log_file.write(f"   The time of astronomical night ends tomrrow is {dawn_time_str}\n")
         log_file.write(f"   The local sunrise time tomorrow is {sunrise_time_str}\n")
@@ -340,7 +340,6 @@ import math
 
 # READ INPUT FILES ===================================================================================================================
 #
-print("\n")
 print("  ...Reading SCOPES.dat")
 scopes_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/SCOPES.dat')
 
@@ -356,7 +355,6 @@ if DEBUG >= 3:
 #  4- Reducer (factor), 
 #  5- Reducer On Scope (YES/NO)
 
-print("\n")
 print("  ...Reading CAMERAS.dat")
 cameras_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/CAMERAS.dat')
 
@@ -379,19 +377,15 @@ if DEBUG >= 3:
 # 11- Read noise low
 # 12- Read noise high
 
-print("\n")
-print("  ..Reading objects DB")
+print("  ...Reading objects DB")
 objects_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/astro_db3.dat')
-print("  ..Done Reading objects DB")
-print("\n")
+print("  ....Done Reading objects DB")
 
 if DEBUG >= 3:
     # print out the stats about the dataframe
-    print("\n")
     log_file.write("OBJECTS\n")
     objects_dataframe.info()
     log_file.write("\n")
-    print("\n")
 
 # DB Fields
 #  0- Label 1, 
@@ -404,30 +398,6 @@ if DEBUG >= 3:
 #  7- Dec, 
 #  8- Type, 
 #  9- Notes
-
-print("\n")
-print("  ..Reading Light Pollution Table")
-light_pollution_df = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/LIGHT_POLLUTION.dat')
-print("\n")
-
-if DEBUG >= 3:
-    # print out the stats about the dataframe
-    print("\n")
-    log_file.write("Light Pollution Table\n")
-    light_pollution_df.info()
-    log_file.write("\n")
-    print("\n")
-
-# 1- F-stop
-# 2- Bortle: 9
-# 3- Bortle: 8
-# 4- Bortle: 7
-# 5- Bortle: 6
-# 6- Bortle: 5
-# 7- Bortle: 4
-# 8- Bortle: 3
-# 9- Bortle: 2
-# 10- Bortle: 3
 
 # =======================================================================================================================================================
 # Calculate Field of View for each scope and camera combination
@@ -894,9 +864,9 @@ for object, row in objects_dataframe.iterrows():
                 FOV_frac = float(object_size) / float(field_of_view)
                 ideal_fov_err1 = abs(FOV_frac - FOV_ideal_frac)
 
-                print(f"DEBUG: Field_of_view = {field_of_view}")
-                print(f"DEBUG: Field_of_view fraction = {FOV_frac}")
-                print(f"DEBUG: Ideal Field_of_view error 1 = {ideal_fov_err1}")
+                #print(f"DEBUG: Field_of_view = {field_of_view}")
+                #print(f"DEBUG: Field_of_view fraction = {FOV_frac}")
+                #print(f"DEBUG: Ideal Field_of_view error 1 = {ideal_fov_err1}")
 
                 # START exposure range
                 if obj_type_filter == 'broadband':
@@ -924,27 +894,20 @@ for object, row in objects_dataframe.iterrows():
 
                                 # fstop, bortle
                 interp_lp_value = f(x = scope_f_stop, y = bortle_class) 
-                #print(f"DEBUG: Interpolated Value = {interp_lp_value}")
 
                 modified_lp_value = interp_lp_value * lp_multiplier
-                #print(f"DEBUG: Modified Interpolated Value = {modified_lp_value}")
                 
                 min_exposure_time = float((10.0 * (cameras_dataframe.loc[camera, 'read_noise_l'])**2) / modified_lp_value)
                 max_exposure_time = float((10.0 * (cameras_dataframe.loc[camera, 'read_noise_h'])**2) / modified_lp_value)
-                #print(f"DEBUG: Fstop: {scope_f_stop}, bortle: {bortle_class}")
-                #print(f"DEBUG: min_exposure_time = {min_exposure_time} sec.")
-                #print(f"DEBUG: max_exposure_time = {max_exposure_time} sec.\n")
                 # stop here
                 # END exposure range
 
                 for jj in range(1, 3):
                     if jj == 1:
-                        print(f"JJ = {jj}  Reducer: NO" )
                         new_row_rec = {'label1': obj_label, 'total_score': score_sum, 'scope': scopes_dataframe.loc[scope, 'label'], 'camera': cameras_dataframe.loc[camera, 'label'], 
                                        'reducer': 'NO', 'field_of_view': field_of_view, 'fov_frac': FOV_frac, 'fov_err': ideal_fov_err1, 'filter': obj_type_filter,
                                        'min_exp': min_exposure_time, 'max_exp': max_exposure_time}
                     else:
-                        print(f"JJ = {jj}  Reducer: YES")
                         field_of_view_ff =  field_of_view / scopes_dataframe.loc[scope, 'reducer_factor']
                         FOV_frac_ff = float(object_size) / float(field_of_view_ff)
                         ideal_fov_err2 = abs(FOV_frac_ff - FOV_ideal_frac)
