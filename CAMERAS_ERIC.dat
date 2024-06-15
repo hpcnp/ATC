@@ -1,0 +1,2 @@
+label,vert_pix,horz_pix,pix_size,type,QE,cooled,imaging,full_well,unity_gain,read_noise_l,read_noise_h
+294mm,2822,4144,4.63,Mono,90,YES,YES,66,139,1.2,7.3

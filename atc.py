@@ -29,16 +29,16 @@ latitude = 33.697472      # Latitude
 longitude = -117.72314     # Longitude
 elevation = 22.0           # Elevation (meters)
 bortle_class = 7          # integer see https://www.lightpollutionmap.info/
-scopes_file = "/Users/christopherporter/Desktop/ASTRO/ATC/scopes.dat"
-cameras_file = "/Users/christopherporter/Desktop/ASTRO/ATC/cameras.dat"
-astro_db_file = "/Users/christopherporter/Desktop/ASTRO/ATC/astro_db3.dat"
+scopes_file = "/Users/christopherporter/Desktop/ASTRO/ATC/SCOPES.dat"
+cameras_file = "/Users/christopherporter/Desktop/ASTRO/ATC/CAMERAS.dat"
+astro_db_file = "/Users/christopherporter/Desktop/ASTRO/ATC/astro_db4.dat"
 LOG = "/Users/christopherporter/Desktop/ASTRO/ATC/atc.log"
 DEBUG = 0               # DEBUG 0,1,2,3   0 - no debug output, 1-3 more and more verbose output
 # 
 # Preferences
-max_obj_magnitude = 14.0    # minimum brightness
-min_obj_size = 90.0          # min object size (arcmin)
-max_obj_size = 220.0         # max object size (arcmin)
+max_obj_magnitude = 15.0    # minimum brightness
+min_obj_size = 20.0          # min object size (arcmin)
+max_obj_size = 100.0         # max object size (arcmin)
 min_time_up = 3.5       # hours that the object will be above min height
 min_altitude = 30.0     # minimum altitude above horizon (deg)
 max_moon_pct = 100.0    # maximum moon phase.  Set to 100.0 to disable
@@ -76,7 +76,8 @@ def decdeg_to_hms(coord_degrees, pretty_print=None, ndp=2):
     rem_seconds = total_seconds - coord_hours * 3600.0
     coord_minutes = int(rem_seconds / 60.0)
     coord_seconds = total_seconds - coord_hours * 3600.0 - coord_minutes * 60.0
-    coord_hms = str(coord_hours) + ":" + str(coord_minutes) + ":" + str(coord_seconds)
+    #coord_hms = str(coord_hours) + ":" + str(coord_minutes) + ":" + str(coord_seconds)
+    coord_hms = '{}:{}:{:.3f}'.format(coord_hours, coord_minutes, coord_seconds)
 
     if DEBUG >= 2:
         log_file.write(f"   Convert DecDeg to HMS: Deg: {coord_degrees} whcih is {coord_hours} hours, {coord_minutes} min, and {coord_seconds} sec\n")
@@ -109,7 +110,8 @@ def decdeg_to_dms(coord_degrees, pretty_print=None, ndp=3):
         coord_degrees = -coord_degrees
     coord_degrees, coord_minutes = int(coord_degrees), int(coord_minutes)
 
-    coord_dms = str(coord_degrees) + ":" + str(coord_minutes) + ":" + str(coord_seconds)
+    #coord_dms = str(coord_degrees) + ":" + str(coord_minutes) + ":" + str(coord_seconds)
+    coord_dms = '{}:{}:{:.3f}'.format(coord_degrees, coord_minutes, coord_seconds)
 
     if pretty_print:
         if pretty_print=='latitude':
@@ -341,7 +343,7 @@ import math
 # READ INPUT FILES ===================================================================================================================
 #
 print("  ...Reading SCOPES.dat")
-scopes_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/SCOPES.dat')
+scopes_dataframe = pd.read_csv(scopes_file)
 
 if DEBUG >= 3:
     log_file.write("SCOPES\n")
@@ -356,7 +358,7 @@ if DEBUG >= 3:
 #  5- Reducer On Scope (YES/NO)
 
 print("  ...Reading CAMERAS.dat")
-cameras_dataframe = pd.read_csv('/Users/christopherporter/Desktop/ASTRO/ATC/CAMERAS.dat')
+cameras_dataframe = pd.read_csv(cameras_file)
 
 if DEBUG >= 3:
     log_file.write("CAMERAS\n")
@@ -939,13 +941,14 @@ for object, row in objects_dataframe.iterrows():
 
 print(f"\nTOTAL Objects passing filter: {objects_passed}\n")
 
-# Sort the filtered dataframe by total score descending
-sorted_filtered_df = filtered_obj_dataframe.sort_values(by=['totalscore'], ascending=False)
+if objects_passed >= 1:
+    # Sort the filtered dataframe by total score descending
+    sorted_filtered_df = filtered_obj_dataframe.sort_values(by=['totalscore'], ascending=False)
 
-#
-# Print up to the first <obj_count> lines of the sorted table
-print(tabulate((sorted_filtered_df[['label1','constellation','magnitude','size','ra','dec','type','score4','totalscore']].head(obj_count)), headers='keys', tablefmt='psql', showindex=False))
+    #
+    # Print up to the first <obj_count> lines of the sorted table
+    print(tabulate((sorted_filtered_df[['label1','constellation','magnitude','size','ra','dec','type','score4','totalscore']].head(obj_count)), headers='keys', tablefmt='psql', floatfmt=".3f", showindex=False))
 
-if output_RECS == 'YES':
-    print("\nReccommended Equipment per Object:")
-    print(tabulate((sorted_recs_df[['label1','total_score','scope','camera','reducer','obj_size','field_of_view','fov_frac','fov_err','filter','min_exp','max_exp']].head(obj_count)), headers='keys', tablefmt='psql', showindex=False))
+    if output_RECS == 'YES':
+        print("\nReccommended Equipment per Object:")
+        print(tabulate((sorted_recs_df[['label1','total_score','scope','camera','reducer','obj_size','field_of_view','fov_frac','fov_err','filter','min_exp','max_exp']].head(obj_count)), headers='keys', tablefmt='psql',floatfmt=".3f", showindex=False))

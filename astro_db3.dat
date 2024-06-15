@@ -2696,7 +2696,7 @@ NGC5190,UGC8500,COLUMBA,13.2,winter,1,202.65,18.13333333,Galaxy,cF;S;R;bM;***f ,
 UGC8507,PGC47506,COLUMBA,13.9,winter,1.4,202.75,19.45,Galaxy,,,,
 NGC5217,UGC8546,COLUMBA,12.6,winter,1.5,203.525,17.85,Galaxy,vF;S;R;bM ,,,
 PK352-7.1,Fleming3;VV133,COMA BERENICES,11.4,spring,0.0333333,270.05,-37.16666667,Planetary Nebula,,,,
-PK354-7.1,,COMA BERENICES,14.5,spring,12.0.13333333,271.225,-36.36666667,Planetary Nebula,,,,
+PK354-7.1,,COMA BERENICES,14.5,spring,12.0,271.225,-36.36666667,Planetary Nebula,,,,
 NGC6541,Dunlop473,COMA BERENICES,6.3,spring,13.1,272,-42.3,Globular Clu.,B;R;eC;gbM;rrr , C ,,
 PK356-11.1,Longmore17,COMA BERENICES,15,spring,1.7,276.95,-36.73333333,Planetary Nebula,,,,
 NGC6726,ESO396-N13,COMA BERENICES,99.9,spring,2,285.425,-35.11666667,Bright Nebula,*6;7 in F;pL neb,,,
@@ -8050,7 +8050,7 @@ PK19+3.1,M3-25,SCULPTOR,15.1,autumn,0.071666667,273.825,-9.833333333,Planetary N
 Tr32,Harvard19,SCULPTOR,12.2,autumn,4,274.3,-12.65,Open Cluster50,13''-pB; pS; nRi; lC; 21* and fuzzy background,,,
 NGC6604,OCL56,SCULPTOR,6.5,autumn,2,274.525,-11.76666667,Open Cluster30,Cl;lRi;lC ,,,
 NGC6605,OCL47,SCULPTOR,6,autumn,,274.6,-13.05,Open Cluster,Cl;lRi;lC;st10...12 ,,,
-NGC6611,M16,SCULPTOR,6,autumn,7,274.7,-12.21666667,Cluster+Nebula60,L;B;scattered Cl;neb invl, M,,
+NGC6611,M16,SCULPTOR,6,autumn,50.,274.7,-12.21666667,Cluster+Nebula60,L;B;scattered Cl;neb invl, M,,
 PK24+3.1,M2-40,SCULPTOR,16.1,autumn,0.085,275.35,-5.966666667,Planetary Nebula,,,,
 PK31+5.1,K3-3,SCULPTOR,14.6,autumn,0.0666667,276.775,1.25,Planetary Nebula,,,,
 vdB123,LBN96,SCULPTOR,99.9,autumn,10,277.6,1.233333333,Bright Nebula,,,,
@@ -10140,3 +10140,316 @@ UGC11651,PGC65775,VULPECULA,13.9,summer,3.4,314.325,25.96666667,Galaxy,,,,
 PK72-17.1,Abell74,VULPECULA,12.2,summer,13.8,319.2,24.16666667,Planetary Nebula,13''-vF;L;irR;nBM at 100X; UHC filter helps ,,,
 NGC7052,UGC11718,VULPECULA,12.4,summer,2.5,319.65,26.45,Galaxy,F;S;vlE;r ,,,
 NGC7080,UGC11756,VULPECULA,12.3,summer,1.8,322.5,26.71666667,Galaxy,vF;S;vlE ,,,
+SH2-1,,Scorpius,7.5,,150,15.980889,-26.120556,Bright Nebula,Irregular
+SH2-2,,Scorpius,9,,60,17.0685,-38.1425,Nebula,Irregular
+SH2-3,,Scorpius,7.5,,12,17.229167,-38.503056,Bright Nebula,Elliptical
+SH2-4,,Scorpius,7.5,,5,17.330222,-39.338889,Bright Nebula,Elliptical
+SH2-5,,Scorpius,9,,100,17.334306,-38.454722,Nebula,Irregular
+SH2-6,,Scorpius,7.5,,4,17.251139,-37.116667,Bright Nebula,Irregular
+SH2-7,,Scorpius,12,,240,16.0055,-22.950556,Nebula,Irregular
+SH2-8,,Scorpius,7.5,,120,17.356889,-36.034722,Bright Nebula,Irregular
+SH2-9,,Scorpius,9,,80,16.353028,-25.589444,Nebula,Irregular
+SH2-10,,Scorpius,9,,60,17.316667,-34.090278,Nebula,Irregular
+SH2-11,,Scorpius,7.5,,90,17.441944,-34.205556,Bright Nebula,Irregular
+SH2-12,,Scorpius,9,,120,17.598944,-32.599722,Nebula,Circular
+SH2-13,,Scorpius,9,,40,17.507944,-31.562778,Nebula,Elliptical
+SH2-14,,Scorpius,9,,2,17.505139,-30.263056,Nebula,Irregular
+SH2-15,,Scorpius,9,,30,17.842889,-31.264167,Nebula,Elliptical
+SH2-16,,Sagittarius,9,,20,17.797833,-29.303889,Nebula,Irregular
+SH2-17,,Sagittarius,9,,25,17.769111,-28.858056,Nebula,Irregular
+SH2-18,,Sagittarius,9,,4,17.812806,-29.251667,Nebula,Circular
+SH2-19,,Sagittarius,9,,12,17.822694,-29.116944,Nebula,Circular
+SH2-20,,Sagittarius,9,,10,17.820639,-28.667222,Nebula,Irregular
+SH2-21,,Sagittarius,9,,5,17.860833,-28.894722,Nebula,Irregular
+SH2-22,,Sagittarius,9,,60,17.917722,-25.036111,Nebula,Irregular
+SH2-23,,Scorpius,12,,50,16.2235,-8.372222,Nebula,Irregular
+SH2-24,,Ophiuchus,9,,30,16.184389,-7.077222,Nebula,Elliptical
+SH2-25,,Sagittarius,7.5,,90,18.090556,-24.394167,Bright Nebula,Irregular
+SH2-26,,Sagittarius,12,,20,17.983056,-23.326389,Nebula,Irregular
+SH2-27,,Ophiuchus,9,,480,16.620111,-10.569722,Nebula,Irregular
+SH2-28,,Sagittarius,12,,40,18.044944,-23.584167,Nebula,Circular
+SH2-29,,Sagittarius,9,,40,18.17525,-23.998611,Nebula,Irregular
+SH2-30,,Sagittarius,7.5,,20,18.0595,-23.015278,Bright Nebula,Irregular
+SH2-31,,Sagittarius,9,,8,18.188417,-23.796667,Nebula,Circular
+SH2-32,,Sagittarius,9,,8,18.181639,-23.6475,Nebula,Circular
+SH2-33,,Serpens,12,,35,15.997889,-1.6175,Nebula,Irregular
+SH2-34,,Sagittarius,9,,90,18.106806,-21.658333,Nebula,Irregular
+SH2-35,,Sagittarius,9,,20,18.264083,-20.251944,Nebula,Irregular
+SH2-36,,Serpens,12,,45,16.09175,0.394444,Nebula,Circular
+SH2-37,,Sagittarius,9,,20,18.295306,-19.664167,Nebula,Irregular
+SH2-38,,Sagittarius,12,,3,18.145972,-18.269167,Nebula,Irregular
+SH2-39,,Sagittarius,9,,3,18.279583,-18.649722,Nebula,Irregular
+SH2-40,,Sagittarius,9,,15,18.200611,-17.744444,Nebula,Irregular
+SH2-41,,Sagittarius,9,,90,18.264278,-18.235278,Nebula,Irregular
+SH2-42,,Sagittarius,9,,3,18.171611,-16.815278,Nebula,Irregular
+SH2-43,,Sagittarius,9,,15,18.273694,-17.400556,Nebula,Elliptical
+SH2-44,,Sagittarius,9,,60,18.274889,-16.733611,Nebula,Irregular
+SH2-45,,Sagittarius,7.5,,60,18.346139,-16.173333,Bright Nebula,Irregular
+SH2-46,,Serpens,9,,25,18.103083,-14.158611,Nebula,Elliptical
+SH2-47,,Serpens,9,,5,18.29575,-15.613889,Nebula,Circular
+SH2-48,,Scutum,9,,10,18.373361,-14.585833,Nebula,Irregular
+SH2-49,,Serpens,7.5,,90,18.311278,-13.961667,Bright Nebula,Irregular
+SH2-50,,Scutum,9,,35,18.425111,-14.711667,Nebula,Irregular
+SH2-51,,Sagittarius,12,,35,18.679639,-16.558333,Nebula,Irregular
+SH2-52,,Sagittarius,9,,2,19.796333,-23.0875,Nebula,Elliptical
+SH2-53,,Scutum,9,,15,18.420778,-13.228889,Nebula,Irregular
+SH2-54,,Serpens Cauda,7.5,,140,18.298111,-11.73,Bright Nebula,Irregular
+SH2-55,,Scutum,12,,5,18.536417,-11.762222,Nebula,Irregular
+SH2-56,,Scutum,12,,7,18.518389,-9.714722,Nebula,Circular
+SH2-57,,Scutum,12,,2,18.509333,-8.615833,Nebula,Irregular
+SH2-58,,Scutum,9,,8,18.524222,-8.463611,Nebula,Irregular
+SH2-59,,Scutum,12,,20,18.617,-7.600278,Nebula,Irregular
+SH2-60,,Scutum,9,,20,18.611389,-6.701111,Nebula,Irregular
+SH2-61,,Scutum,7.5,,2,18.548639,-5.01,Bright Nebula,Irregular
+SH2-62,,Serpens,12,,4,18.459556,-3.856111,Nebula,Irregular
+SH2-63,,Sagittarius,12,,55,19.962,-14.115556,Nebula,Irregular
+SH2-64,,Serpens,9,,25,18.526639,-1.913056,Nebula,Irregular
+SH2-65,,Aquila,9,,7,18.782806,-3.743056,Nebula,Irregular
+SH2-66,,Aquila,9,,8,18.758361,-1.996389,Nebula,Irregular
+SH2-67,,Aquila,12,,10,18.823583,-2.353611,Nebula,Elliptical
+SH2-68,,Serpens,9,,8,18.419861,0.855,Nebula,Irregular
+SH2-69,,Aquila,9,,20,18.740611,-0.282222,Nebula,Elliptical
+SH2-70,,Ophiuchus,9,,5,18.244139,7.063056,Nebula,Irregular
+SH2-71,,Aquila,7.5,,3,19.034083,2.159722,Bright Nebula,Elliptical
+SH2-72,,Aquila,9,,25,19.064,2.313889,Nebula,Irregular
+SH2-73,,Hercules,12,,75,16.185444,21.873889,Nebula,Irregular
+SH2-74,,Aquila,9,,3,19.146944,5.608889,Nebula,Irregular
+SH2-75,,Aquila,12,,10,18.987611,7.12,Nebula,Circular
+SH2-76,,Aquila,12,,7,18.940472,7.813333,Nebula,Circular
+SH2-77,,Aquila,12,,8,19.804806,1.148056,Nebula,Elliptical
+SH2-78,,Aquila,12,,12,19.053083,14.129444,Nebula,Circular
+SH2-79,,Aquila,12,,40,19.388444,13.976111,Nebula,Irregular
+SH2-80,,Sagitta,7.5,,2,19.191361,16.865833,Bright Nebula,Irregular
+SH2-81,,Aquila,12,,10,20.020417,11.792778,Nebula,Irregular
+SH2-82,,Sagitta,9,,9,19.505778,18.275556,Nebula,Irregular
+SH2-83,,Vulpecula,9,,2,19.408944,20.795833,Nebula,Circular
+SH2-84,,Sagitta,7.5,,15,19.817778,18.400278,Bright Nebula,Irregular
+SH2-85,,Lyra,9,,6,19.054778,25.830278,Nebula,Irregular
+SH2-86,,Vulpecula,9,,40,19.719361,23.2875,Nebula,Circular
+SH2-87,,Vulpecula,12,,10,19.773528,24.628056,Nebula,Irregular
+SH2-88,,Vulpecula,9,,25,19.766333,25.343889,Nebula,Irregular
+SH2-89,,Vulpecula,12,,5,19.834,26.486111,Nebula,Circular
+SH2-90,,Vulpecula,9,,6,19.820361,26.867778,Nebula,Irregular
+SH2-91,,Cygnus,12,,120,19.592778,29.604444,Nebula,Irregular
+SH2-92,,Vulpecula,12,,50,19.777583,28.245556,Nebula,Circular
+SH2-93,,Vulpecula,7.5,,1,19.917,27.213611,Bright Nebula,Irregular
+SH2-94,,Cygnus,12,,25,19.464333,31.470556,Nebula,Irregular
+SH2-95,,Vulpecula,9,,1,19.917139,29.296944,Nebula,Circular
+SH2-96,,Cygnus,12,,25,19.478361,32.689167,Nebula,Irregular
+SH2-97,,Cygnus,12,,10,19.934806,30.265833,Nebula,Circular
+SH2-98,,Cygnus,12,,15,19.979028,31.421667,Nebula,Circular
+SH2-99,,Cygnus,7.5,,5,20.014167,33.492778,Bright Nebula,Irregular
+SH2-100,,Cygnus,7.5,,4,20.030889,33.511667,Bright Nebula,Irregular
+SH2-101,,Cygnus,9,,20,19.999306,35.291111,Nebula,Irregular
+SH2-102,,Cygnus,12,,40,20.52975,30.605278,Nebula,Irregular
+SH2-103,,Cygnus,7.5,,210,20.842361,30.923333,Bright Nebula,Irregular
+SH2-104,,Cygnus,9,,7,20.295861,36.744444,Nebula,Circular
+SH2-105,,Cygnus,7.5,,18,20.200778,38.349722,Bright Nebula,Elliptical
+SH2-106,,Cygnus,7.5,,3,20.457694,37.396944,Bright Nebula,Irregular
+SH2-107,,Cygnus,9,,5,20.713,36.342778,Nebula,Elliptical
+SH2-108,,Cygnus,7.5,,180,20.376528,40.254167,Bright Nebula,Irregular
+SH2-109,,Cygnus,9,,1080.00,20.560694,40.3425,Nebula,Elliptical
+SH2-110,,Cygnus,12,,50,21.346917,32.457778,Nebula,Irregular
+SH2-111,,Cygnus,12,,90,21.698139,30.105833,Nebula,Irregular
+SH2-112,,Cygnus,9,,15,20.564,45.659722,Nebula,Circular
+SH2-113,,Cygnus,12,,15,21.346722,38.091389,Nebula,Irregular
+SH2-114,,Cygnus,9,,9,21.353,38.708611,Nebula,Irregular
+SH2-115,,Cygnus,9,,50,20.576111,46.878056,Nebula,Irregular
+SH2-116,,Cygnus,9,,2,20.538694,47.356944,Nebula,Circular
+SH2-117,,Cygnus,9,,240,20.979611,44.321944,Nebula,Irregular
+SH2-118,,Cygnus,12,,480,21.616972,40.215833,Nebula,Irregular
+SH2-119,,Cygnus,7.5,,160,21.307167,43.937778,Bright Nebula,Elliptical
+SH2-120,,Cygnus,12,,1,21.063083,49.880833,Nebula,Circular
+SH2-121,,Cygnus,12,,1,21.086861,49.649722,Nebula,Irregular
+SH2-122,,Pegasus,12,,40,23.146472,14.925,Nebula,Irregular
+SH2-123,,Cygnus,9,,13,21.706333,44.54,Nebula,Elliptical
+SH2-124,,Cygnus,9,,70,21.639361,50.351389,Nebula,Circular
+SH2-125,,Cygnus,7.5,,9,21.892556,47.271667,Bright Nebula,Elliptical
+SH2-126,,Lacerta,9,,160,22.557639,38.582222,Nebula,Irregular
+SH2-127,,Cygnus,9,,2,21.478306,54.620833,Nebula,Irregular
+SH2-128,,Cepheus,7.5,,1,21.535778,55.859167,Bright Nebula,Irregular
+SH2-129,,Cepheus,9,,140,21.195806,59.961389,Nebula,Irregular
+SH2-130,,Cepheus,9,,3,20.716556,63.228333,Nebula,Irregular
+SH2-131,,Cepheus,9,,170,21.650083,57.485833,Nebula,Circular
+SH2-132,,Cepheus,9,,90,22.31325,56.134722,Nebula,Irregular
+SH2-133,,Cepheus,12,,80,21.483306,64.305278,Nebula,Irregular
+SH2-134,,Cepheus,9,,160,22.191639,59.410278,Nebula,Irregular
+SH2-135,,Cepheus,9,,15,22.369889,58.738333,Nebula,Irregular
+SH2-136,,Cepheus,7.5,,5,21.274917,68.253056,Bright Nebula,Irregular
+SH2-137,,Cepheus,12,,90,21.952,64.693611,Nebula,Irregular
+SH2-138,,Cepheus,9,,1,22.544306,58.481667,Nebula,Irregular
+SH2-139,,Cepheus,12,,10,22.583444,58.217222,Nebula,Irregular
+SH2-140,,Cepheus,7.5,,30,22.318833,63.285278,Bright Nebula,Elliptical
+SH2-141,,Cepheus,9,,5,22.475139,61.644722,Nebula,Circular
+SH2-142,,Cepheus,7.5,,30,22.79325,58.061111,Bright Nebula,Irregular
+SH2-143,,Cepheus,12,,4,22.837472,57.713056,Nebula,Irregular
+SH2-144,,Cepheus,12,,4,22.747833,59.892222,Nebula,Irregular
+SH2-145,,Cepheus,12,,90,22.426,64.308611,Nebula,Elliptical
+SH2-146,,Cepheus,9,,2,22.823972,59.929167,Nebula,Irregular
+SH2-147,,Cepheus,12,,2,22.924917,58.466944,Nebula,Circular
+SH2-148,,Cepheus,7.5,,2,22.936722,58.517222,Bright Nebula,Irregular
+SH2-149,,Cepheus,9,,1,22.940111,58.534167,Nebula,Circular
+SH2-150,,Cepheus,9,,40,22.519972,65.113889,Nebula,Irregular
+SH2-151,,Cassiopeia,12,,20,23.050944,57.071667,Nebula,Irregular
+SH2-152,,Cassiopeia,7.5,,2,22.977167,58.785556,Bright Nebula,Irregular
+SH2-153,,Cassiopeia,9,,5,22.987333,58.736111,Nebula,Circular
+SH2-154,,Cepheus,9,,60,22.856833,61.180556,Nebula,Irregular
+SH2-155,,Cepheus,9,,60,22.9455,62.617778,Nebula,Irregular
+SH2-156,,Cepheus,7.5,,2,23.086278,60.256389,Bright Nebula,Circular
+SH2-157,,Cassiopeia,7.5,,90,23.267667,60.045556,Bright Nebula,Irregular
+SH2-158,,Cepheus,7.5,,10,23.227861,61.511111,Bright Nebula,Elliptical
+SH2-159,,Cassiopeia,9,,7,23.261972,61.145278,Nebula,Irregular
+SH2-160,,Cepheus,12,,80,23.096583,64.673333,Nebula,Irregular
+SH2-161,,Cassiopeia,9,,55,23.258194,61.861944,Nebula,Elliptical
+SH2-162,,Cassiopeia,7.5,,40,23.345028,61.197778,Bright Nebula,Irregular
+SH2-163,,Cassiopeia,9,,10,23.555444,60.785556,Nebula,Irregular
+SH2-164,,Cassiopeia,9,,3,23.640444,59.970556,Nebula,Irregular
+SH2-165,,Cassiopeia,9,,10,23.663639,61.9375,Nebula,Elliptical
+SH2-166,,Cassiopeia,12,,10,23.702889,60.971389,Nebula,Circular
+SH2-167,,Cepheus,12,,2,23.589583,64.853056,Nebula,Circular
+SH2-168,,Cassiopeia,9,,7,23.884389,60.473056,Nebula,Elliptical
+SH2-169,,Cassiopeia,12,,5,23.899667,60.373056,Nebula,Circular
+SH2-170,,Cassiopeia,9,,20,0.028444,64.623333,Nebula,Circular
+SH2-171,,Cepheus,7.5,,180,0.077861,67.156667,Bright Nebula,Irregular
+SH2-172,,Cassiopeia,12,,1,0.259139,61.255833,Nebula,Elliptical
+SH2-173,,Cassiopeia,9,,30,0.364417,61.738056,Nebula,Circular
+SH2-174,,Cepheus,12,,10,23.780361,80.938889,Nebula,Irregular
+SH2-175,,Cassiopeia,9,,2,0.455333,64.703611,Nebula,Circular
+SH2-176,,Cassiopeia,12,,10,0.527583,57.285833,Nebula,Irregular
+SH2-177,,Cassiopeia,12,,40,0.525861,62.469167,Nebula,Irregular
+SH2-178,,Ursa Minor,12,,420,22.315611,87.761667,Nebula,Irregular
+SH2-179,,Cassiopeia,12,,1,0.673722,62.866111,Nebula,Circular
+SH2-180,,Cassiopeia,12,,15,0.812972,62.929167,Nebula,Irregular
+SH2-181,,Cassiopeia,12,,15,0.821306,65.212222,Nebula,Irregular
+SH2-182,,Cassiopeia,12,,2,0.837972,64.745,Nebula,Irregular
+SH2-183,,Cassiopeia,12,,35,0.899944,65.709722,Nebula,Irregular
+SH2-184,,Cassiopeia,7.5,,40,0.880778,56.610278,Bright Nebula,Irregular
+SH2-185,,Cassiopeia,9,,120,1,60.989722,Nebula,Irregular
+SH2-186,,Cassiopeia,9,,1,1.147528,63.134167,Nebula,Irregular
+SH2-187,,Cassiopeia,9,,10,1.3855,61.856667,Nebula,Irregular
+SH2-188,,Cassiopeia,9,,9,1.510944,58.366667,Nebula,Irregular
+SH2-189,,Cassiopeia,12,,2,2.202389,64.171667,Nebula,Circular
+SH2-190,,Cassiopeia,7.5,,150,2.556444,61.442222,Bright Nebula,Irregular
+SH2-191,,Cassiopeia,7.5,,2,2.610917,59.637222,Bright Nebula,Irregular
+SH2-192,,Cassiopeia,12,,1,2.787278,61.988056,Nebula,Elliptical
+SH2-193,,Cassiopeia,12,,2,2.792361,62.004167,Nebula,Elliptical
+SH2-194,,Cassiopeia,9,,2,2.788861,61.937778,Nebula,Elliptical
+SH2-195,,Cassiopeia,12,,3,2.668333,59.648889,Nebula,Irregular
+SH2-196,,Cassiopeia,9,,4,2.855333,62.231389,Nebula,Circular
+SH2-197,,Cassiopeia,12,,5,2.698722,59.646111,Nebula,Irregular
+SH2-198,,Cassiopeia,9,,9,2.833833,59.7,Nebula,Elliptical
+SH2-199,,Cassiopeia,7.5,,120,2.909333,60.409444,Bright Nebula,Irregular
+SH2-200,,Cassiopeia,12,,6,3.179194,62.815556,Nebula,Elliptical
+SH2-201,,Cassiopeia,7.5,,5,3.052889,60.478333,Bright Nebula,Irregular
+SH2-202,,Camelopardalis,12,,170,3.314306,59.633889,Nebula,Irregular
+SH2-203,,Perseus,12,,45,3.366944,54.877778,Nebula,Circular
+SH2-204,,Camelopardalis,9,,40,3.929361,57.428889,Nebula,Irregular
+SH2-205,,Camelopardalis,9,,120,3.935611,53.194444,Nebula,Irregular
+SH2-206,,Perseus,7.5,,50,4.053639,51.329444,Bright Nebula,Irregular
+SH2-207,,Camelopardalis,9,,4,4.334722,53.143611,Nebula,Circular
+SH2-208,,Camelopardalis,7.5,,1,4.329417,52.977778,Bright Nebula,Circular
+SH2-209,,Perseus,9,,14,4.184167,51.163056,Nebula,Irregular
+SH2-210,,Perseus,9,,20,4.516417,52.552778,Nebula,Irregular
+SH2-211,,Perseus,7.5,,2,4.616056,50.939444,Bright Nebula,Irregular
+SH2-212,,Perseus,7.5,,5,4.677167,50.381111,Bright Nebula,Circular
+SH2-213,,Perseus,12,,1,4.345278,44.925,Nebula,Irregular
+SH2-214,,Perseus,12,,4,4.359694,44.373056,Nebula,Circular
+SH2-215,,Perseus,9,,2,4.2925,42.615,Nebula,Irregular
+SH2-216,,Perseus,9,,80,4.749167,46.820833,Nebula,Irregular
+SH2-217,,Auriga,9,,9,4.979861,48.005556,Nebula,Elliptical
+SH2-218,,Auriga,12,,70,5.687944,52.188333,Nebula,Elliptical
+SH2-219,,Auriga,7.5,,3,4.935556,47.395278,Bright Nebula,Elliptical
+SH2-220,,Perseus,7.5,,320,4.010667,36.617222,Bright Nebula,Irregular
+SH2-221,,Auriga,12,,120,5.027778,46.348889,Nebula,Irregular
+SH2-222,,Perseus,7.5,,6,4.502722,35.27,Bright Nebula,Irregular
+SH2-223,,Auriga,9,,70,5.286639,42.211944,Nebula,Irregular
+SH2-224,,Auriga,9,,30,5.454472,42.971111,Nebula,Irregular
+SH2-225,,Auriga,9,,10,5.450111,40.621667,Nebula,Irregular
+SH2-226,,Auriga,7.5,,3,5.185222,37.9925,Bright Nebula,Irregular
+SH2-227,,Auriga,9,,20,5.331472,38.955278,Nebula,Irregular
+SH2-228,,Auriga,7.5,,8,5.226417,37.453333,Bright Nebula,Irregular
+SH2-229,,Auriga,7.5,,65,5.271944,34.463333,Bright Nebula,Irregular
+SH2-230,,Auriga,9,,300,5.375111,34.131944,Nebula,Irregular
+SH2-231,,Auriga,9,,12,5.655444,35.925,Nebula,Irregular
+SH2-232,,Auriga,9,,40,5.707417,36.200833,Nebula,Elliptical
+SH2-233,,Auriga,9,,2,5.645306,35.793056,Nebula,Irregular
+SH2-234,,Auriga,7.5,,12,5.468833,34.435278,Bright Nebula,Irregular
+SH2-235,,Auriga,7.5,,10,5.683722,35.854167,Bright Nebula,Irregular
+SH2-236,,Auriga,7.5,,55,5.376056,33.365,Bright Nebula,Irregular
+SH2-237,,Auriga,7.5,,7,5.52375,34.277222,Bright Nebula,Irregular
+SH2-238,,Taurus,7.5,,1,4.363889,19.537778,Bright Nebula,Irregular
+SH2-239,,Taurus,9,,5,4.5215,18.116667,Nebula,Irregular
+SH2-240,,Taurus,9,,180,5.683417,28.103611,Nebula,Circular
+SH2-241,,Auriga,7.5,,10,6.068694,30.247778,Bright Nebula,Irregular
+SH2-242,,Taurus,9,,7,5.864278,27.010833,Nebula,Circular
+SH2-243,,NULL,12,,6,5.65625,23.290833,Nebula,Irregular
+SH2-244,,Taurus,7.5,,5,5.575194,21.9525,Bright Nebula,Elliptical
+SH2-245,,Taurus,9,,720,4.042639,4.128611,Nebula,Irregular
+SH2-246,,Taurus,12,,65,5.036,14.095833,Nebula,Irregular
+SH2-247,,Taurus,9,,9,6.14175,21.62,Nebula,Circular
+SH2-248,,Gemini,7.5,,50,6.277417,22.500278,Bright Nebula,Elliptical
+SH2-249,,Gemini,9,,80,6.3495,23.089722,Nebula,Irregular
+SH2-250,,Taurus,12,,10,4.669806,7.362778,Nebula,Irregular
+SH2-251,,Taurus,12,,35,4.547167,5.862778,Nebula,Irregular
+SH2-252,,Orion,7.5,,40,6.160917,20.500556,Bright Nebula,Irregular
+SH2-253,,Gemini,12,,5,6.428861,20.028056,Nebula,Irregular
+SH2-254,,Orion,9,,11,6.205806,18.043889,Nebula,Elliptical
+SH2-255,,Orion,7.5,,3,6.219083,17.975278,Bright Nebula,Circular
+SH2-256,,Orion,9,,1,6.210722,17.943056,Nebula,Irregular
+SH2-257,,Orion,7.5,,3,6.214083,17.975833,Bright Nebula,Circular
+SH2-258,,Orion,9,,1,6.225722,17.924167,Nebula,Irregular
+SH2-259,,Orion,12,,2,6.193722,17.445556,Nebula,Circular
+SH2-260,,Orion,12,,22,4.918861,5.661667,Nebula,Irregular
+SH2-261,,Orion,9,,45,6.149222,15.801944,Nebula,Irregular
+SH2-262,,Orion,12,,20,5.112556,6.167778,Nebula,Irregular
+SH2-263,,Orion,9,,22,5.362417,8.399167,Nebula,Elliptical
+SH2-264,,Orion,9,,390,5.586806,9.933333,Nebula,Circular
+SH2-265,,Orion,9,,70,5.310111,7.439722,Nebula,Irregular
+SH2-266,,Orion,7.5,,1,6.313833,15.277778,Bright Nebula,Elliptical
+SH2-267,,Orion,9,,4,6.264806,14.268333,Nebula,Circular
+SH2-268,,Orion,12,,60,6.170861,13.331944,Nebula,Irregular
+SH2-269,,Orion,7.5,,4,6.242833,13.821389,Bright Nebula,Irregular
+SH2-270,,Orion,7.5,,1,6.1705,12.815278,Bright Nebula,Irregular
+SH2-271,,Orion,7.5,,2,6.2485,12.353889,Bright Nebula,Circular
+SH2-272,,Orion,9,,1,6.250167,12.336944,Nebula,Elliptical
+SH2-273,,Monoceros,7.5,,250,6.680139,9.908056,Bright Nebula,Irregular
+SH2-274,,Gemini,7.5,,8,7.48525,13.261944,Bright Nebula,Irregular
+SH2-275,,Monoceros,7.5,,100,6.528583,4.929722,Bright Nebula,Circular
+SH2-276,,Orion,9,,1200.0,5.457806,-3.965278,Nebula,Elliptical
+SH2-277,,Orion,7.5,,120,5.678778,-2.447222,Bright Nebula,Irregular
+SH2-278,,Orion,9,,50,5.330056,-5.663611,Nebula,Irregular
+SH2-279,,Orion,7.5,,20,5.588944,-4.800833,Bright Nebula,Irregular
+SH2-280,,Monoceros,9,,40,6.572028,2.54,Nebula,Irregular
+SH2-281,,Orion,7.5,,60,5.581833,-5.466667,Bright Nebula,Irregular
+SH2-282,,Monoceros,9,,35,6.633056,1.514444,Nebula,Irregular
+SH2-283,,Monoceros,12,,3,6.644194,0.712778,Nebula,Irregular
+SH2-284,,Monoceros,9,,80,6.750556,0.230833,Nebula,Elliptical
+SH2-285,,Monoceros,7.5,,1,6.920111,-0.510278,Bright Nebula,Circular
+SH2-286,,Monoceros,12,,6,6.90925,-4.508889,Nebula,Elliptical
+SH2-287,,Monoceros,9,,12,6.992389,-4.803889,Nebula,Irregular
+SH2-288,,Monoceros,7.5,,1,7.14275,-4.308333,Bright Nebula,Irregular
+SH2-289,,Monoceros,12,,11,6.765722,-7.338333,Nebula,Elliptical
+SH2-290,,Cancer,9,,17,8.903083,8.921111,Nebula,Elliptical
+SH2-291,,Monoceros,9,,8,6.923667,-8.027778,Nebula,Elliptical
+SH2-292,,Monoceros,7.5,,21,7.073833,-10.448889,Bright Nebula,Irregular
+SH2-293,,Canis Major,9,,11,7.029917,-11.309444,Nebula,Circular
+SH2-294,,Monoceros,7.5,,7,7.27625,-9.443889,Bright Nebula,Irregular
+SH2-295,,Canis Major,12,,8,7.044833,-11.461667,Nebula,Circular
+SH2-296,,Monoceros,7.5,,200,7.096694,-11.218889,Bright Nebula,Irregular
+SH2-297,,Canis Major,7.5,,7,7.087611,-12.334444,Bright Nebula,Irregular
+SH2-298,,Canis Major,7.5,,22,7.310556,-13.198611,Bright Nebula,Irregular
+SH2-299,,Puppis,12,,1,7.511056,-15.292778,Nebula,Irregular
+SH2-300,,Puppis,12,,3,7.517639,-15.410278,Nebula,Elliptical
+SH2-301,,Canis Major,7.5,,9,7.163556,-18.478611,Bright Nebula,Elliptical
+SH2-302,,Puppis,9,,21,7.528306,-16.978611,Nebula,Elliptical
+SH2-303,,Canis Major,9,,90,6.9005,-22.425,Nebula,Elliptical
+SH2-304,,Canis Major,9,,200,6.724056,-24.133333,Nebula,Irregular
+SH2-305,,Puppis,7.5,,4,7.50225,-18.525,Bright Nebula,Irregular
+SH2-306,,Puppis,12,,30,7.510194,-19.109444,Nebula,Irregular
+SH2-307,,Puppis,7.5,,6,7.592222,-18.753889,Bright Nebula,Irregular
+SH2-308,,Canis Major,9,,35,6.902694,-23.942222,Nebula,Irregular
+SH2-309,,Puppis,9,,12,7.535028,-19.429444,Nebula,Elliptical
+SH2-310,,Canis Major,9,,480,7.217611,-24.586389,Nebula,Irregular
+SH2-311,,Puppis,7.5,,45,7.872444,-26.441111,Bright Nebula,Irregular
+SH2-312,,Pyxis,9,,720,8.986028,-25.688611,Nebula,Irregular
+SH2-313,,Hydra,9,,12,12.892111,-22.86,Nebula,Circular
